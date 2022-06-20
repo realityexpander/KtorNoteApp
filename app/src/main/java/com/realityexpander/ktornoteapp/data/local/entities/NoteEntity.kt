@@ -17,7 +17,5 @@ data class NoteEntity(
     val color: String,
 
     @Expose(deserialize = false, serialize = false) // Ignored by retrofit and not serialized/deserialized
-    val isSynced: Boolean = false, // ignored by room
+    val isSynced: Boolean = false
 )
-
-

@@ -116,4 +116,7 @@ dependencies {
 
     // Color Picker Dialog
     implementation "com.github.skydoves:colorpickerview:2.1.7"
+
+    // For Ktor HTTP Response Codes
+    implementation "io.ktor:ktor-server-core:$ktor_version"
 }
