@@ -5,11 +5,16 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textViewStyle">@style/PoppinsTextStyle</item>
+        <item name="android:textViewStyle">@style/SourceSansProStyle</item>
     </style>
+<!--        <item name="android:textViewStyle">@style/PoppinsTextStyle</item> -->
 
     <style name="PoppinsTextStyle" parent="android:Widget.TextView">
         <item name="fontFamily">@font/poppins_regular</item>
+    </style>
+
+    <style name="SourceSansProStyle" parent="android:Widget.TextView">
+        <item name="fontFamily">@font/sourcesanspro_regular</item>
     </style>
 
 </resources>

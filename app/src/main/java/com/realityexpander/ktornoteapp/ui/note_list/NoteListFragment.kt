@@ -34,6 +34,8 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         binding.fabAddNote.setOnClickListener {
             findNavController().navigate(NoteListFragmentDirections.actionNotesListFragmentToAddEditNoteFragment(""))
         }
+
+        showSnackbar("Hello from NoteListFragment")
     }
 
     override fun onDestroyView() {
