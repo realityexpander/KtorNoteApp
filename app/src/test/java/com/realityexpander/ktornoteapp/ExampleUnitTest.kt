@@ -1,4 +1,4 @@
-package com.androiddevs.ktornoteapp
+package com.realityexpander.ktornoteapp
 
 import org.junit.Test
 

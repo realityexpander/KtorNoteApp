@@ -49,6 +49,7 @@
         android:backgroundTint="@color/colorAccent"
         app:fabSize="normal"
         app:layout_anchor="@id/swipeRefreshLayout"
-        app:layout_anchorGravity="bottom|right|end" />
+        app:layout_anchorGravity="bottom|right|end"
+        android:contentDescription="Add note" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

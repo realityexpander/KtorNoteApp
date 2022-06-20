@@ -1,4 +1,4 @@
-package com.androiddevs.ktornoteapp
+package com.realityexpander.ktornoteapp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
