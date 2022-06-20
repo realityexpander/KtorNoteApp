@@ -7,7 +7,7 @@ import androidx.room.Query
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
-interface NoteDao {
+interface NotesDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNote(note: NoteEntity)
