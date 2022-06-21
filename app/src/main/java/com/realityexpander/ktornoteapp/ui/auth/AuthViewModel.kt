@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.realityexpander.ktornoteapp.common.Resource
+import com.realityexpander.ktornoteapp.common.Status
 import com.realityexpander.ktornoteapp.repositories.NoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -45,6 +46,25 @@ class AuthViewModel @Inject constructor(
                     data = result.data?.message ?: "Unknown error"
                 )
             )
+
+        }
+    }
+
+    fun getNotesFromApi() {
+        viewModelScope.launch {
+            val result = repository.getNotesFromApi()
+
+            when(result.status) {
+                Status.SUCCESS -> {
+                    println(result.data)
+                }
+                Status.ERROR -> {
+                    println(result.message)
+                }
+                else -> {
+                    println("Unknown error")
+                }
+            }
 
         }
     }

@@ -43,7 +43,10 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
         subscribeToObservers()
 
         binding.btnLogin.setOnClickListener {
-            findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNotesListFragment())
+            viewModel.getNotesFromApi()
+//            viewModel.deleteNoteFromApi()
+
+            //findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNotesListFragment())
         }
 
         binding.etRegisterPasswordConfirm.onImeDone {

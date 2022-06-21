@@ -6,8 +6,11 @@ import okhttp3.Interceptor
 import okhttp3.Response
 
 class BasicAuthInterceptor: Interceptor {
-    var email: String? = null
-    var password: String? = null
+//    var email: String? = null
+//    var password: String? = null
+
+    var email: String? = "test@123.com"
+    var password: String? = "test123"
 
     override fun intercept(chain: Interceptor.Chain): Response {
 

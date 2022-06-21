@@ -8,6 +8,7 @@ import com.realityexpander.ktornoteapp.data.remote.responses.SimpleResponse
 import com.realityexpander.ktornoteapp.data.remote.responses.SimpleResponseWithData
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface NotesApi {
@@ -37,6 +38,6 @@ interface NotesApi {
         @Body addOwnerIdToNoteId: AddOwnerIdToNoteIdRequest,  // @Body means the addOwnerIdToNoteId is the body of the request and will be converted to a JSON object string
     ): Response<SimpleResponseWithData<NoteEntity>>
 
-    @POST("/getNotes")
+    @GET("/getNotes")
     suspend fun getNotes(): Response<SimpleResponseWithData<List<NoteEntity>>>
 }

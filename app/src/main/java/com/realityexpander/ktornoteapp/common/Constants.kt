@@ -8,7 +8,7 @@ object Constants {
     // These endpoints will be accessed without authentication headers
     val PUBLIC_ENDPOINTS = listOf(
         "/login",
-        "/register"
+        "/register",
     )
 
     const val DATABASE_NAME = "notes_database"
