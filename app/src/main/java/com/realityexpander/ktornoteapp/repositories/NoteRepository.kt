@@ -48,7 +48,7 @@ class NoteRepository @Inject constructor(
 
             if (retrofitResponse.isSuccessful) {
                 return@withContext retrofitResponse.body()?.let { apiResponse ->
-                    if (apiResponse.successful) {
+                    if (apiResponse.iSuccessful) {
                         Resource.success(apiResponse.message, apiResponse)
                     } else {
                         Resource.error(
