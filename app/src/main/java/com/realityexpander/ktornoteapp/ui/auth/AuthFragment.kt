@@ -70,7 +70,7 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
                 when (resource.status) {
                     Status.SUCCESS -> {
                         binding.registerProgressBar.visibility = View.GONE
-                        showSnackbar(resource.data ?: resource.message ?: "Register Status error")
+                        showSnackbar(resource.data ?: resource.message ?: "Register Status error: No message sent from server")
                         //findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNotesListFragment())
                     }
                     Status.ERROR -> {

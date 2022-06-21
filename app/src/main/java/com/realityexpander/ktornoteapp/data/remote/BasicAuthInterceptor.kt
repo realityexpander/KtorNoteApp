@@ -9,8 +9,11 @@ class BasicAuthInterceptor: Interceptor {
 //    var email: String? = null
 //    var password: String? = null
 
-    var email: String? = "test@123.com"
-    var password: String? = "test123x"
+//    var email: String? = "test@123.com"
+//    var password: String? = "test123"
+
+    var email = "test@1234.com"
+    var password = "12345678"
 
     override fun intercept(chain: Interceptor.Chain): Response {
 

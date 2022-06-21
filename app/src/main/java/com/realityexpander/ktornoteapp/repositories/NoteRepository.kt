@@ -26,81 +26,69 @@ class NoteRepository @Inject constructor(
     /// Remote API ///
 
     suspend fun register(email: String, password: String) =
-    withContext(Dispatchers.IO) {
         callApi {
             notesApi.register(AccountRequest(email, password))
         }
-    }
 
     suspend fun getNotesFromApi() =
-    withContext(Dispatchers.IO) {
         callApi {
             notesApi.getNotes()
         }
-    }
 
-    suspend fun deleteNoteFromApi() =
-    withContext(Dispatchers.IO) {
+    suspend fun deleteNoteFromApi(deleteNoteId: String) =
         callApi {
-            notesApi.deleteNote(DeleteNoteRequest("11223344"))
+            notesApi.deleteNote(DeleteNoteRequest(deleteNoteId))
         }
-    }
 
     private suspend fun <T : BaseSimpleResponse> callApi(
         call: suspend () -> Response<out T>
-    ): Resource<T> =
-    try {
-        val retrofitResponse = call()
+    ): Resource<T> = withContext(Dispatchers.IO) {
+        try {
+            val retrofitResponse = call()
 
-        if (retrofitResponse.isSuccessful) {
-            retrofitResponse.body()?.let { apiResponse ->
-                return if (apiResponse.successful) {
-                    Resource.success(apiResponse.message,
-                        apiResponse
-                    )
-                } else {
-                    Resource.error(apiResponse.message,
-                        fromValue(retrofitResponse.code()),
-                        apiResponse
-                    )
-                }
-            } ?: Resource.error(
-                "Error - missing api response body",
-                fromValue(retrofitResponse.code()),
-                null
-            )
-        }
-
-        // retrofit call was not successful (network error?)
-        // try to get the error message string from the error body
-        val errorMessageFromServer = try {
-            val errorMsg = gson.fromJson(
-                retrofitResponse.errorBody()?.string(),
-                SimpleResponse::class.java // error messages are always SimpleResponse
-            ).message
-
-            if (errorMsg.isBlank()) {
-                "Server error: ${retrofitResponse.message()}"
+            if (retrofitResponse.isSuccessful) {
+                return@withContext retrofitResponse.body()?.let { apiResponse ->
+                    if (apiResponse.successful) {
+                        Resource.success(apiResponse.message, apiResponse)
+                    } else {
+                        Resource.error(
+                            apiResponse.message,
+                            fromValue(retrofitResponse.code()),
+                            apiResponse
+                        )
+                    }
+                } ?: Resource.error(
+                    "Error - missing api response body",
+                    fromValue(retrofitResponse.code()),
+                    null
+                )
             }
 
-            errorMsg
+            // Retrofit call or API call was not successful. (network error?)
+            // Try to get the error message string from the error body
+            val errorMessageFromServer = try {
+                val errorMsg = gson.fromJson(
+                    retrofitResponse.errorBody()?.string(),
+                    SimpleResponse::class.java // error messages are always SimpleResponse
+                ).message
+
+                if (errorMsg.isBlank()) {
+                    "Server error: ${retrofitResponse.message()}"
+                }
+
+                errorMsg
+            } catch (e: Exception) {
+                e.printStackTrace()
+
+                "Server Error: ${retrofitResponse.message()}"
+            }
+
+            Resource.error(errorMessageFromServer, fromValue(retrofitResponse.code()), null)
         } catch (e: Exception) {
             e.printStackTrace()
 
-            "Server Error: ${retrofitResponse.message()}"
+            Resource.error(e.message ?: "Unknown error", InternalServerError, null)
         }
-
-        Resource.error(errorMessageFromServer,
-            fromValue(retrofitResponse.code()),
-            null
-        )
-    } catch (e: Exception) {
-        e.printStackTrace()
-
-        Resource.error(e.message ?: "Unknown error",
-            InternalServerError,
-            null
-        )
     }
 
 
