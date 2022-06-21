@@ -10,12 +10,10 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.realityexpander.ktornoteapp.R
 import com.realityexpander.ktornoteapp.common.Status
-import com.realityexpander.ktornoteapp.data.remote.NotesApi
 import com.realityexpander.ktornoteapp.databinding.FragmentAuthBinding
-import com.realityexpander.ktornoteapp.repositories.NoteRepository
 import com.realityexpander.ktornoteapp.ui.BaseFragment
+import com.realityexpander.ktornoteapp.ui.common.onImeDone
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
 class AuthFragment: BaseFragment(R.layout.fragment_auth) {
@@ -48,6 +46,10 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
             findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNotesListFragment())
         }
 
+        binding.etRegisterPasswordConfirm.onImeDone {
+            binding.btnRegister.performClick()
+        }
+
         binding.btnRegister.setOnClickListener {
             viewModel.register(
                 binding.etRegisterEmail.text.toString(),
@@ -70,7 +72,7 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
                     }
                     Status.ERROR -> {
                         binding.registerProgressBar.visibility = View.GONE
-                        showSnackbar(resource.message ?: "Register Status error")
+                        showSnackbar(resource.message ?: "registerStatus error")
                     }
                     Status.LOADING -> {
                         binding.registerProgressBar.visibility = View.VISIBLE

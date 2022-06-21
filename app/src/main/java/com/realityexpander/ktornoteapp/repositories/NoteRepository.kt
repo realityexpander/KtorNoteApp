@@ -1,6 +1,7 @@
 package com.realityexpander.ktornoteapp.repositories
 
 import android.app.Application
+import com.google.gson.Gson
 import com.realityexpander.ktornoteapp.common.Resource
 import com.realityexpander.ktornoteapp.data.local.NotesDao
 import com.realityexpander.ktornoteapp.data.remote.NotesApi
@@ -16,7 +17,8 @@ import javax.inject.Inject
 class NoteRepository @Inject constructor(
     private val notesDao: NotesDao,
     private val context: Application,  // for connectivity check
-    private val notesApi: NotesApi
+    private val notesApi: NotesApi,
+    private val gson: Gson
 ) {
     /// Remote API ///
 
@@ -47,7 +49,15 @@ class NoteRepository @Inject constructor(
             }
 
             // retrofit call was not successful (network error?)
-            return@withContext Resource.error(retrofitResponse.message(), null)
+            // try to get the error message string from the error body
+            var errorMessageFromServer = gson.fromJson(
+                retrofitResponse.errorBody()?.string(),
+                SimpleResponse::class.java
+            ).message
+            if(errorMessageFromServer.isBlank()) {
+                errorMessageFromServer = "Something went wrong - missing error message from server: ${retrofitResponse.message()}"
+            }
+            return@withContext Resource.error(errorMessageFromServer, null)
         } catch (e: Exception) {
             e.printStackTrace()
             return@withContext Resource.error(e.message ?: "Unknown error", null)

@@ -48,6 +48,10 @@ object AppModule {
 
     @Singleton
     @Provides
+    fun provideGson(): Gson = Gson()
+
+    @Singleton
+    @Provides
     fun provideBasicAuthInterceptor(): BasicAuthInterceptor =
         BasicAuthInterceptor()
 
