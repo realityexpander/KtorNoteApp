@@ -9,6 +9,8 @@ import com.realityexpander.ktornoteapp.data.remote.requests.AccountRequest
 import com.realityexpander.ktornoteapp.data.remote.requests.DeleteNoteRequest
 import com.realityexpander.ktornoteapp.data.remote.responses.BaseSimpleResponse
 import com.realityexpander.ktornoteapp.data.remote.responses.SimpleResponse
+import io.ktor.http.HttpStatusCode.Companion.InternalServerError
+import io.ktor.http.HttpStatusCode.Companion.fromValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response
@@ -23,20 +25,22 @@ class NoteRepository @Inject constructor(
 ) {
     /// Remote API ///
 
-    suspend fun register(email: String, password: String) = withContext(Dispatchers.IO) {
-
+    suspend fun register(email: String, password: String) =
+    withContext(Dispatchers.IO) {
         callApi {
             notesApi.register(AccountRequest(email, password))
         }
     }
 
-    suspend fun getNotesFromApi() = withContext(Dispatchers.IO) {
+    suspend fun getNotesFromApi() =
+    withContext(Dispatchers.IO) {
         callApi {
             notesApi.getNotes()
         }
     }
 
-    suspend fun deleteNoteFromApi() = withContext(Dispatchers.IO) {
+    suspend fun deleteNoteFromApi() =
+    withContext(Dispatchers.IO) {
         callApi {
             notesApi.deleteNote(DeleteNoteRequest("11223344"))
         }
@@ -51,12 +55,18 @@ class NoteRepository @Inject constructor(
         if (retrofitResponse.isSuccessful) {
             retrofitResponse.body()?.let { apiResponse ->
                 return if (apiResponse.successful) {
-                    Resource.success(apiResponse.message, apiResponse)
+                    Resource.success(apiResponse.message,
+                        apiResponse
+                    )
                 } else {
-                    Resource.error(apiResponse.message, apiResponse)
+                    Resource.error(apiResponse.message,
+                        fromValue(retrofitResponse.code()),
+                        apiResponse
+                    )
                 }
             } ?: Resource.error(
-                "Something went wrong - missing api response body",
+                "Error - missing api response body",
+                fromValue(retrofitResponse.code()),
                 null
             )
         }
@@ -70,21 +80,27 @@ class NoteRepository @Inject constructor(
             ).message
 
             if (errorMsg.isBlank()) {
-                "Missing server error message: ${retrofitResponse.message()}"
+                "Server error: ${retrofitResponse.message()}"
             }
 
             errorMsg
         } catch (e: Exception) {
             e.printStackTrace()
 
-            "Server Error message: ${retrofitResponse.message()}"
+            "Server Error: ${retrofitResponse.message()}"
         }
 
-        Resource.error(errorMessageFromServer, null)
+        Resource.error(errorMessageFromServer,
+            fromValue(retrofitResponse.code()),
+            null
+        )
     } catch (e: Exception) {
         e.printStackTrace()
 
-        Resource.error(e.message ?: "Unknown error", null)
+        Resource.error(e.message ?: "Unknown error",
+            InternalServerError,
+            null
+        )
     }
 
 

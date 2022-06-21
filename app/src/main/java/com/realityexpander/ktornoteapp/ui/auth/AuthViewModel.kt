@@ -23,12 +23,16 @@ class AuthViewModel @Inject constructor(
         _registerStatus.postValue(Resource.loading())
 
         if(email.isEmpty() || password.isEmpty() || repeatedPassword.isEmpty()) {
-            _registerStatus.postValue(Resource.error("Please enter email and password"))
+            _registerStatus.postValue(Resource.error(
+                "Please enter email and password"
+            ))
             return
         }
 
         if(password != repeatedPassword) {
-            _registerStatus.postValue(Resource.error("Passwords do not match"))
+            _registerStatus.postValue(Resource.error(
+                "Passwords do not match",
+            ))
             return
         }
 
@@ -59,7 +63,7 @@ class AuthViewModel @Inject constructor(
                     println(result.data)
                 }
                 Status.ERROR -> {
-                    println(result.message)
+                    println(result.message +", "+ result.status)
                 }
                 else -> {
                     println("Unknown error")
