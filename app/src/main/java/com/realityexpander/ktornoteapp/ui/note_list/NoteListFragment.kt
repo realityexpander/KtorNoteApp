@@ -21,12 +21,11 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentNoteListBinding.inflate(inflater, container, false)
         val view = binding.root
         return view
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

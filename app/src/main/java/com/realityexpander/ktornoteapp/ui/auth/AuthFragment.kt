@@ -20,7 +20,7 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentAuthBinding.inflate(inflater, container, false)
         val view = binding.root
         return view
