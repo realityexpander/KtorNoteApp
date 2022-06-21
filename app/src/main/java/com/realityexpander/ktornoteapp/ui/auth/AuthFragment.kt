@@ -1,15 +1,26 @@
 package com.realityexpander.ktornoteapp.ui.auth
 
+import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.realityexpander.ktornoteapp.R
+import com.realityexpander.ktornoteapp.common.Status
+import com.realityexpander.ktornoteapp.data.remote.NotesApi
 import com.realityexpander.ktornoteapp.databinding.FragmentAuthBinding
+import com.realityexpander.ktornoteapp.repositories.NoteRepository
 import com.realityexpander.ktornoteapp.ui.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.runBlocking
 
+@AndroidEntryPoint
 class AuthFragment: BaseFragment(R.layout.fragment_auth) {
+
+    private val viewModel: AuthViewModel by viewModels()
 
     private var _binding: FragmentAuthBinding? = null
     // This property is only valid between onCreateView and
@@ -29,10 +40,44 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        requireActivity().requestedOrientation = SCREEN_ORIENTATION_PORTRAIT
+
+        subscribeToObservers()
+
         binding.btnLogin.setOnClickListener {
             findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNotesListFragment())
         }
 
+        binding.btnRegister.setOnClickListener {
+            viewModel.register(
+                binding.etRegisterEmail.text.toString(),
+                binding.etRegisterPassword.text.toString(),
+                binding.etRegisterPasswordConfirm.text.toString(),
+            )
+            // findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToRegisterFragment())
+        }
+
+    }
+
+    private fun subscribeToObservers() {
+        viewModel.registerStatus.observe(viewLifecycleOwner, Observer { result ->
+            result?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        binding.registerProgressBar.visibility = View.GONE
+                        showSnackbar(resource.data ?: resource.message ?: "Register Status error")
+                        //findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNotesListFragment())
+                    }
+                    Status.ERROR -> {
+                        binding.registerProgressBar.visibility = View.GONE
+                        showSnackbar(resource.message ?: "Register Status error")
+                    }
+                    Status.LOADING -> {
+                        binding.registerProgressBar.visibility = View.VISIBLE
+                    }
+                }
+            }
+        })
     }
 
     override fun onDestroyView() {
