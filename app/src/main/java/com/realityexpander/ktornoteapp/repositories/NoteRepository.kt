@@ -73,53 +73,50 @@ class NoteRepository @Inject constructor(
         }
     }
 
-//    private suspend fun callApi(
-//        call: suspend () -> Response<out BaseSimpleResponse>,
-//    ): Resource<BaseSimpleResponse> = withContext(Dispatchers.IO) {
-
     private suspend fun <T : BaseSimpleResponse> callApi(
-        call: suspend () -> Response<out T>,
-    ): Resource<T> = //withContext(Dispatchers.IO) {
+        call: suspend () -> Response<out T>
+    ): Resource<T> =
+    try {
+        val retrofitResponse = call()
 
-        try {
-            //val retrofitResponse = notesApi.register(AccountRequest(email, password))
-            val retrofitResponse = call()
-
-            if (retrofitResponse.isSuccessful) {
-                retrofitResponse.body()?.let { apiResponse ->
-                    if (apiResponse.successful) {
-                        return/*@withContext*/ Resource.success(apiResponse.message, apiResponse)
-                    } else {
-                        return/*@withContext*/ Resource.error(apiResponse.message, apiResponse)
-                    }
-                } ?: /*return@withContext*/ Resource.error(
-                    "Something went wrong - missing api response body",
-                    null
-                )
-            }
-
-            // retrofit call was not successful (network error?)
-            // try to get the error message string from the error body
-            val errorMessageFromServer = try {
-                val errorMsg = gson.fromJson(
-                    retrofitResponse.errorBody()?.string(),
-                    SimpleResponse::class.java
-                ).message
-
-                if (errorMsg.isBlank()) {
-                    "Missing server error message: ${retrofitResponse.message()}"
+        if (retrofitResponse.isSuccessful) {
+            retrofitResponse.body()?.let { apiResponse ->
+                return if (apiResponse.successful) {
+                    Resource.success(apiResponse.message, apiResponse)
+                } else {
+                    Resource.error(apiResponse.message, apiResponse)
                 }
-                errorMsg
-            } catch (e: Exception) {
-                e.printStackTrace()
-                "Server Error message: ${retrofitResponse.message()}"
+            } ?: Resource.error(
+                "Something went wrong - missing api response body",
+                null
+            )
+        }
+
+        // retrofit call was not successful (network error?)
+        // try to get the error message string from the error body
+        val errorMessageFromServer = try {
+            val errorMsg = gson.fromJson(
+                retrofitResponse.errorBody()?.string(),
+                SimpleResponse::class.java // error messages are always SimpleResponse
+            ).message
+
+            if (errorMsg.isBlank()) {
+                "Missing server error message: ${retrofitResponse.message()}"
             }
-            /*return@withContext*/ Resource.error(errorMessageFromServer, null)
+
+            errorMsg
         } catch (e: Exception) {
             e.printStackTrace()
-            /*return@withContext*/ Resource.error(e.message ?: "Unknown error", null)
+
+            "Server Error message: ${retrofitResponse.message()}"
         }
-    //}
+
+        Resource.error(errorMessageFromServer, null)
+    } catch (e: Exception) {
+        e.printStackTrace()
+
+        Resource.error(e.message ?: "Unknown error", null)
+    }
 
 
     /// Local Database ///
