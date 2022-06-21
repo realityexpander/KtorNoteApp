@@ -63,7 +63,7 @@ class AuthViewModel @Inject constructor(
                     println(result.data)
                 }
                 Status.ERROR -> {
-                    println(result.message +", "+ result.status)
+                    println(result.message +", "+ result.statusCode)
                 }
                 else -> {
                     println("Unknown error")
