@@ -28,37 +28,6 @@ class NoteRepository @Inject constructor(
         callApi {
             notesApi.register(AccountRequest(email, password))
         }
-
-//        try {
-//            val retrofitResponse = notesApi.register(AccountRequest(email, password))
-//
-//            if (retrofitResponse.isSuccessful) {
-//                retrofitResponse.body()?.let { apiResponse ->
-//                    if (apiResponse.successful) {
-//                        return@withContext Resource.success(apiResponse.message, apiResponse)
-//                    } else {
-//                        return@withContext Resource.error(apiResponse.message, apiResponse)
-//                    }
-//                } ?: return@withContext Resource.error(
-//                    "Something went wrong - missing api response body",
-//                    null
-//                )
-//            }
-//
-//            // retrofit call was not successful (network error?)
-//            // try to get the error message string from the error body
-//            var errorMessageFromServer = gson.fromJson(
-//                retrofitResponse.errorBody()?.string(),
-//                SimpleResponse::class.java
-//            ).message
-//            if(errorMessageFromServer.isBlank()) {
-//                errorMessageFromServer = "Something went wrong - missing error message from server: ${retrofitResponse.message()}"
-//            }
-//            return@withContext Resource.error(errorMessageFromServer, null)
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//            return@withContext Resource.error(e.message ?: "Unknown error", null)
-//        }
     }
 
     suspend fun getNotesFromApi() = withContext(Dispatchers.IO) {
