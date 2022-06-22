@@ -18,7 +18,7 @@
         android:label="AuthFragment" >
         <action
             android:id="@+id/action_authFragment_to_notesListFragment"
-            app:destination="@id/notesListFragment" />
+            app:destination="@id/noteListFragment" />
     </fragment>
     <fragment
         android:id="@+id/noteDetailFragment"
@@ -32,7 +32,7 @@
             app:argType="string" />
     </fragment>
     <fragment
-        android:id="@+id/notesListFragment"
+        android:id="@+id/noteListFragment"
         android:name="com.realityexpander.ktornoteapp.ui.note_list.NoteListFragment"
         android:label="NotesListFragment" >
         <action

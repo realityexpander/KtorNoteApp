@@ -6,14 +6,14 @@ import okhttp3.Interceptor
 import okhttp3.Response
 
 class BasicAuthInterceptor: Interceptor {
-//    var email: String? = null
-//    var password: String? = null
+    var email: String? = null
+    var password: String? = null
 
 //    var email: String? = "test@123.com"
 //    var password: String? = "test123"
 
-    var email = "test@1234.com"
-    var password = "12345678"
+//    var email = "test@1234.com"
+//    var password = "12345678"
 
     override fun intercept(chain: Interceptor.Chain): Response {
 
@@ -28,5 +28,19 @@ class BasicAuthInterceptor: Interceptor {
             .header("Authorization", Credentials.basic(email ?: "", password ?: ""))
             .build()
         return chain.proceed(authenticatedRequest)
+    }
+
+    fun setCredentials(email: String, password: String) {
+        if(email.isNotEmpty() && password.isNotEmpty()) {
+            this.email = email
+            this.password = password
+        } else {
+            throw IllegalArgumentException("Email and password must not be empty")
+        }
+    }
+
+    fun clearCredentials() {
+        this.email = null
+        this.password = null
     }
 }

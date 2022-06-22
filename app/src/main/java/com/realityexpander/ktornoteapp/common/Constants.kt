@@ -13,6 +13,11 @@ object Constants {
 
     const val DATABASE_NAME = "notes_database"
 
-    const val ENCRYPTED_SHARED_PREF_NAME = "encrypted_shared_pref"
+    const val ENCRYPTED_SHARED_PREF_NAME =
+        "encrypted_shared_pref"
+    const val ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_EMAIL =
+        "encrypted_shared_pref_key_logged_in_email"
+    const val ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_PASSWORD =
+        "encrypted_shared_pref_key_logged_in_password"
 
 }

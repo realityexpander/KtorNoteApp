@@ -1,5 +1,6 @@
 package com.realityexpander.ktornoteapp.ui.auth
 
+import android.content.SharedPreferences
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,17 +8,30 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import com.realityexpander.ktornoteapp.R
 import com.realityexpander.ktornoteapp.common.Status
+import com.realityexpander.ktornoteapp.data.remote.BasicAuthInterceptor
 import com.realityexpander.ktornoteapp.databinding.FragmentAuthBinding
 import com.realityexpander.ktornoteapp.ui.BaseFragment
-import com.realityexpander.ktornoteapp.ui.common.onImeDone
+import com.realityexpander.ktornoteapp.ui.common.*
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AuthFragment: BaseFragment(R.layout.fragment_auth) {
 
     private val viewModel: AuthViewModel by viewModels()
+
+    @Inject
+    lateinit var sharedPref: SharedPreferences
+
+    @Inject
+    lateinit var basicAuthInterceptor: BasicAuthInterceptor
+
+    private var curEmail: String? = null
+    private var curPassword: String? = null
 
     private var _binding: FragmentAuthBinding? = null
     // This property is only valid between onCreateView and
@@ -37,6 +51,15 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if(isLoggedIn(sharedPref)) {
+            setApiCredentials(basicAuthInterceptor,
+                getLoggedInEmail(sharedPref)!!,
+                getLoggedInPassword(sharedPref)!!
+            )
+
+            navigateToNoteList()
+        }
+
         requireActivity().requestedOrientation = SCREEN_ORIENTATION_PORTRAIT
 
         subscribeToObservers()
@@ -46,9 +69,12 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
         }
 
         binding.btnLogin.setOnClickListener {
+            curEmail = binding.etLoginEmail.text.toString()
+            curPassword = binding.etLoginPassword.text.toString()
+
             viewModel.login(
-                binding.etLoginEmail.text.toString(),
-                binding.etLoginPassword.text.toString(),
+                curEmail ?: "",
+                curPassword ?: ""
             )
 
             //findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNotesListFragment())
@@ -59,9 +85,12 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
         }
 
         binding.btnRegister.setOnClickListener {
+            curEmail = binding.etRegisterEmail.text.toString()
+            curPassword = binding.etRegisterPassword.text.toString()
+
             viewModel.register(
-                binding.etRegisterEmail.text.toString(),
-                binding.etRegisterPassword.text.toString(),
+                curEmail ?: "",
+                curPassword ?: "",
                 binding.etRegisterPasswordConfirm.text.toString(),
             )
             // findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToRegisterFragment())
@@ -76,8 +105,18 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
                     Status.SUCCESS -> {
                         binding.registerProgressBar.visibility = View.GONE
                         binding.loginProgressBar.visibility = View.GONE
-                        showSnackbar(resource.data ?: resource.message ?: "Auth Status error: No message sent from server")
-                        //findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNotesListFragment())
+                        showSnackbar(resource.data ?: resource.message ?: "Auth Status Success: No message sent from server")
+
+                        if(saveAllCredentials(sharedPref,
+                            basicAuthInterceptor,
+                            curEmail,
+                            curPassword)
+                        ) {
+                            // showSnackbar("Credentials saved to shared prefs")
+                            navigateToNoteList()
+                        }
+
+                        viewModel.savingCredentialsFailed()
                     }
                     Status.ERROR -> {
                         binding.registerProgressBar.visibility = View.GONE
@@ -92,6 +131,17 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
                 }
             }
         })
+    }
+
+    private fun navigateToNoteList() {
+        val navOptions = NavOptions.Builder()
+            .setPopUpTo(R.id.authFragment, true)  // removes this fragment from the back stack
+            .build()
+
+        findNavController().navigate(
+            AuthFragmentDirections.actionAuthFragmentToNotesListFragment(),
+            navOptions
+        )
     }
 
     override fun onDestroyView() {

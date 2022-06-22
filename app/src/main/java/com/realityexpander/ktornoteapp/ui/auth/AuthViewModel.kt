@@ -92,4 +92,10 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun savingCredentialsFailed() {
+        _authenticationStatus.postValue(Resource.error(
+            "Saving Credentials failed"
+        ))
+    }
+
 }
