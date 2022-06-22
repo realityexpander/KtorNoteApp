@@ -3,7 +3,7 @@ package com.realityexpander.ktornoteapp.repositories
 import android.app.Application
 import com.google.gson.Gson
 import com.realityexpander.ktornoteapp.common.Resource
-import com.realityexpander.ktornoteapp.common.checkForInternetConnection
+import com.realityexpander.ktornoteapp.common.isInternetConnected
 import com.realityexpander.ktornoteapp.common.networkBoundResource
 import com.realityexpander.ktornoteapp.data.local.NotesDao
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
@@ -68,7 +68,7 @@ class NoteRepository @Inject constructor(
                 }
             },
             shouldFetch = { _ ->
-                checkForInternetConnection(context)
+                isInternetConnected(context)
             },
             debugNwResponseType = { response ->
                 println(response)

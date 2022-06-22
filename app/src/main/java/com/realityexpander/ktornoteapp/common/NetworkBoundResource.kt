@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.*
 // DbResultType comes from the database and are used to determine what kind of result is being returned
 
 inline fun <DbResultType, NwResponseType> networkBoundResource(
-    crossinline queryDb: () -> Flow<DbResultType>,    // from the database
-    crossinline fetchFromNetwork: suspend () -> NwResponseType, // from the network
-    crossinline saveFetchResponseToDb: suspend (NwResponseType) -> Unit,  // save to the database
-    crossinline onFetchFailed: (Throwable) -> Unit = { Unit },   // returns Unit by default
-    crossinline shouldFetch: (DbResultType) -> Boolean = { true },  // returns true by default
+    crossinline queryDb: () -> Flow<DbResultType>,                          // data from the database
+    crossinline fetchFromNetwork: suspend () -> NwResponseType,             // data from the network
+    crossinline saveFetchResponseToDb: suspend (NwResponseType) -> Unit,    // save to the database
+    crossinline onFetchFailed: (Throwable) -> Unit = { Unit },
+    crossinline shouldFetch: (DbResultType) -> Boolean = { true },
     crossinline debugNwResponseType: (NwResponseType) -> Unit = { Unit },
     crossinline debugDbResultType: (DbResultType) -> Unit = { Unit },
 ) = flow {
@@ -26,7 +26,7 @@ inline fun <DbResultType, NwResponseType> networkBoundResource(
 
     val flow =
         // check network connection
-        if (shouldFetch(data)) {
+        if (shouldFetch(data)) { // data is ignored
             // emit the data we have so far, if any (from the database)
             emit(Resource.loading(null, data))
 
