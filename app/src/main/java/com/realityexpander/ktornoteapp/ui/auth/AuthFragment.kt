@@ -126,7 +126,7 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
                     Status.LOADING -> {
                         binding.registerProgressBar.visibility = View.VISIBLE
                         binding.loginProgressBar.visibility = View.VISIBLE
-                        if(!resource.message.isNullOrBlank()) showToast(resource.message)
+                        showToast(resource.message)
                     }
                 }
             }

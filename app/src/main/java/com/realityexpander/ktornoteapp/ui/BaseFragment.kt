@@ -14,7 +14,9 @@ abstract class BaseFragment(layoutId: Int): Fragment(layoutId) {
        ).show()
     }
 
-    fun showToast(message: String) {
+    fun showToast(message: String?) {
+        if(message.isNullOrBlank()) return
+
         Toast(requireActivity().applicationContext).apply {
             setText(message)
             duration = Toast.LENGTH_SHORT
