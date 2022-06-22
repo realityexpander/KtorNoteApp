@@ -2,21 +2,21 @@ package com.realityexpander.ktornoteapp.common
 
 import kotlinx.coroutines.flow.*
 
-// NwResponseType comes from the network and are used to determine what kind of request is being made
-// DbResultType comes from the database and are used to determine what kind of result is being returned
+// NetworkResponseType comes from the network and are used to determine kind of response is being returned
+// DatabaseResultType comes from the database and are used to determine kind of result is being returned
 
-inline fun <DbResultType, NwResponseType> networkBoundResource(
-    crossinline queryDb: () -> Flow<DbResultType>,                          // data from the database
-    crossinline fetchFromNetwork: suspend () -> NwResponseType,             // data from the network
-    crossinline saveFetchResponseToDb: suspend (NwResponseType) -> Unit,    // save to the database
+inline fun <DatabaseResultType, NetworkResponseType> networkBoundResource(
+    crossinline queryDb: () -> Flow<DatabaseResultType>,
+    crossinline fetchFromNetwork: suspend () -> NetworkResponseType,
+    crossinline saveFetchResponseToDb: suspend (NetworkResponseType) -> Unit,
     crossinline onFetchFailed: (Throwable) -> Unit = { Unit },
-    crossinline shouldFetch: (DbResultType) -> Boolean = { true },
-    crossinline debugNwResponseType: (NwResponseType) -> Unit = { Unit },
-    crossinline debugDbResultType: (DbResultType) -> Unit = { Unit },
+    crossinline shouldFetch: (DatabaseResultType) -> Boolean = { true },
+    crossinline debugNetworkResponseType: (NetworkResponseType) -> Unit = { Unit },
+    crossinline debugDatabaseResultType: (DatabaseResultType) -> Unit = { Unit },
 ) = flow {
 
-    debugNwResponseType(fetchFromNetwork())
-    debugDbResultType(queryDb().first())
+    debugNetworkResponseType(fetchFromNetwork())
+    debugDatabaseResultType(queryDb().first())
 
     // indicate that data is loading
     emit(Resource.loading(null))
@@ -25,8 +25,10 @@ inline fun <DbResultType, NwResponseType> networkBoundResource(
     val staleData = queryDb().first()
 
     val flow =
+
         // check network connection
-        if (shouldFetch(staleData)) { // data is ignored
+        if (shouldFetch(staleData)) {
+
             // emit the data we have so far, if any (from the database)
             emit(Resource.loading(null, staleData))
 

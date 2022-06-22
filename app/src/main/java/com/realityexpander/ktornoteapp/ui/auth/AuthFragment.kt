@@ -64,6 +64,8 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
 
         subscribeToObservers()
 
+        //viewModel.testCrossinline()
+
         binding.etLoginPassword.onImeDone {
             binding.btnLogin.performClick()
         }
@@ -71,8 +73,6 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
         binding.btnLogin.setOnClickListener {
             curEmail = binding.etLoginEmail.text.toString()
             curPassword = binding.etLoginPassword.text.toString()
-
-            viewModel.testCrossinline(); return@setOnClickListener
 
             viewModel.login(
                 curEmail ?: "",

@@ -46,6 +46,11 @@ class NoteRepository @Inject constructor(
             notesApi.getNotes()
         }
 
+    suspend fun deleteNoteFromApi(deleteNoteId: String) =
+        callApi {
+            notesApi.deleteNote(DeleteNoteRequest(deleteNoteId))
+        }
+
     fun getAllNotesCached(): Flow<Resource<List<NoteEntity>>> {
         return networkBoundResource(
             queryDb = {
@@ -72,19 +77,14 @@ class NoteRepository @Inject constructor(
             shouldFetch = { _ ->
                 isInternetConnected(context)
             },
-            debugNwResponseType = { response ->
+            debugNetworkResponseType = { response ->
                 println(response)
             },
-            debugDbResultType = { result ->
+            debugDatabaseResultType = { result ->
                 println(result)
             }
         )
     }
-
-    suspend fun deleteNoteFromApi(deleteNoteId: String) =
-        callApi {
-            notesApi.deleteNote(DeleteNoteRequest(deleteNoteId))
-        }
 
     private suspend fun <T : BaseSimpleResponse> callApi(
         call: suspend () -> Response<out T>
@@ -151,29 +151,30 @@ class NoteRepository @Inject constructor(
     /// Tests ///
 
     fun testNetworkBoundResource(): Flow<Resource<Pair<String, String>>> {  // always returns a Flow of Resource of a type
-        // oldValue, newValue
-        var dbValue = Pair("stale DB value", "[no new value]")
+        // <currentValue, previousValue>
+        var dbEntity = Pair("stale DB value", "[no previous value]")
 
         return networkBoundResource(
             queryDb = {
                 println("querying db...")
 
-                flow { emit(dbValue) }  // simulate a query emission from db
+                flow { emit(dbEntity) }  // simulate a query emission from db
             },
             fetchFromNetwork = {
                 println("fetching from network...")
 
                 "fresh value"  // simulate network response
             },
-            debugNwResponseType = { response ->
+            debugNetworkResponseType = { response ->
                 println("debugNwResponseType: '$response'")
             },
-            debugDbResultType = { result ->
+            debugDatabaseResultType = { result ->
                 println("debugDbResultType: '$result'")
             },
             saveFetchResponseToDb = { response ->
                 println("Saving to DB: '$response'")
-                dbValue = Pair(response, dbValue.first)
+
+                dbEntity = Pair(response, dbEntity.first)
             }
         )
     }
