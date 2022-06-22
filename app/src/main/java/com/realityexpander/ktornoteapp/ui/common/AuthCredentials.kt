@@ -5,6 +5,7 @@ import com.realityexpander.ktornoteapp.common.Constants.ENCRYPTED_SHARED_PREF_KE
 import com.realityexpander.ktornoteapp.common.Constants.ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_PASSWORD
 import com.realityexpander.ktornoteapp.data.remote.BasicAuthInterceptor
 
+// Remove from shared preferences and api when user logs out
 fun removeAllCredentials(
     sharedPref: SharedPreferences,
     basicAuthInterceptor: BasicAuthInterceptor
@@ -17,6 +18,7 @@ fun removeAllCredentials(
     basicAuthInterceptor.clearCredentials()
 }
 
+// Save to shared prefs and api interceptor
 fun saveAllCredentials(
     sharedPref: SharedPreferences,
     basicAuthInterceptor: BasicAuthInterceptor,
@@ -47,6 +49,7 @@ fun setApiCredentials(basicAuthInterceptor: BasicAuthInterceptor,
     basicAuthInterceptor.setCredentials(email, password)
 }
 
+// Check if logged in even when offline (had to log in online at least once)
 fun isLoggedIn(sharedPref: SharedPreferences): Boolean {
     return sharedPref.getString(ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_EMAIL, null) != null &&
         sharedPref.getString(ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_PASSWORD, null) != null
