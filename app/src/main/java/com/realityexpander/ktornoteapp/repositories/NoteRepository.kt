@@ -30,6 +30,11 @@ class NoteRepository @Inject constructor(
             notesApi.register(AccountRequest(email, password))
         }
 
+    suspend fun login(email: String, password: String) =
+        callApi {
+            notesApi.login(AccountRequest(email, password))
+        }
+
     suspend fun getNotesFromApi() =
         callApi {
             notesApi.getNotes()
@@ -48,8 +53,8 @@ class NoteRepository @Inject constructor(
 
             if (retrofitResponse.isSuccessful) {
                 return@withContext retrofitResponse.body()?.let { apiResponse ->
-                    if (apiResponse.iSuccessful) {
-                        Resource.success(apiResponse.message, apiResponse)
+                    if (apiResponse.isSuccessful) {
+                        Resource.success(apiResponse.message, apiResponse, apiResponse.statusCode)
                     } else {
                         Resource.error(
                             apiResponse.message,

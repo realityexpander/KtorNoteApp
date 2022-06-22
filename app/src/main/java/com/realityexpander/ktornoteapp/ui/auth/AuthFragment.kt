@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import com.realityexpander.ktornoteapp.R
 import com.realityexpander.ktornoteapp.common.Status
 import com.realityexpander.ktornoteapp.databinding.FragmentAuthBinding
@@ -42,9 +41,15 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
 
         subscribeToObservers()
 
+        binding.etLoginPassword.onImeDone {
+            binding.btnLogin.performClick()
+        }
+
         binding.btnLogin.setOnClickListener {
-            viewModel.getNotesFromApi()
-//            viewModel.deleteNoteFromApi()
+            viewModel.login(
+                binding.etLoginEmail.text.toString(),
+                binding.etLoginPassword.text.toString(),
+            )
 
             //findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNotesListFragment())
         }
@@ -65,20 +70,24 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
     }
 
     private fun subscribeToObservers() {
-        viewModel.registerStatus.observe(viewLifecycleOwner, Observer { result ->
+        viewModel.authenticationStatus.observe(viewLifecycleOwner, Observer { result ->
             result?.let { resource ->
                 when (resource.status) {
                     Status.SUCCESS -> {
                         binding.registerProgressBar.visibility = View.GONE
-                        showSnackbar(resource.data ?: resource.message ?: "Register Status error: No message sent from server")
+                        binding.loginProgressBar.visibility = View.GONE
+                        showSnackbar(resource.data ?: resource.message ?: "Auth Status error: No message sent from server")
                         //findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNotesListFragment())
                     }
                     Status.ERROR -> {
                         binding.registerProgressBar.visibility = View.GONE
-                        showSnackbar(resource.message ?: "registerStatus error")
+                        binding.loginProgressBar.visibility = View.GONE
+                        showSnackbar(resource.message ?: "Authentication Status error")
                     }
                     Status.LOADING -> {
                         binding.registerProgressBar.visibility = View.VISIBLE
+                        binding.loginProgressBar.visibility = View.VISIBLE
+                        if(!resource.message.isNullOrBlank()) showToast(resource.message)
                     }
                 }
             }

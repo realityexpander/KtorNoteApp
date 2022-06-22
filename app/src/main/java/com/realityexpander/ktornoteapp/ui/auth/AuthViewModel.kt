@@ -16,31 +16,54 @@ class AuthViewModel @Inject constructor(
     private val repository: NoteRepository
 ) : ViewModel() {
 
-    private val _registerStatus = MutableLiveData<Resource<String>>()
-    val registerStatus: LiveData<Resource<String>> = _registerStatus
+    private val _authenticationStatus = MutableLiveData<Resource<String>>()
+    val authenticationStatus: LiveData<Resource<String>> = _authenticationStatus
 
     fun register(email: String, password: String, repeatedPassword: String) {
-        _registerStatus.postValue(Resource.loading())
 
         if(email.isEmpty() || password.isEmpty() || repeatedPassword.isEmpty()) {
-            _registerStatus.postValue(Resource.error(
+            _authenticationStatus.postValue(Resource.error(
                 "Please enter email and password"
             ))
             return
         }
 
         if(password != repeatedPassword) {
-            _registerStatus.postValue(Resource.error(
+            _authenticationStatus.postValue(Resource.error(
                 "Passwords do not match",
             ))
             return
         }
 
-        _registerStatus.postValue( Resource.loading("Registering user...") )
+        _authenticationStatus.postValue( Resource.loading("Registering user...") )
         viewModelScope.launch {
             val result = repository.register(email, password)
 
-            _registerStatus.postValue(
+            _authenticationStatus.postValue(
+                Resource(
+                    status = result.status,
+                    message = result.message ?: "Unknown error",
+                    data = result.data?.message ?: "Unknown error"
+                )
+            )
+        }
+    }
+
+    fun login(email: String, password: String) {
+        _authenticationStatus.postValue(Resource.loading())
+
+        if(email.isEmpty() || password.isEmpty() ) {
+            _authenticationStatus.postValue(Resource.error(
+                "Please enter email and password"
+            ))
+            return
+        }
+
+        _authenticationStatus.postValue( Resource.loading(message = "Logging in user...") )
+        viewModelScope.launch {
+            val result = repository.login(email, password)
+
+            _authenticationStatus.postValue(
                 Resource(
                     status = result.status,
                     message = result.message ?: "Unknown error",

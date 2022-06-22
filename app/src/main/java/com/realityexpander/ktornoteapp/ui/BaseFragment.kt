@@ -1,5 +1,6 @@
 package com.realityexpander.ktornoteapp.ui
 
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 
@@ -11,5 +12,16 @@ abstract class BaseFragment(layoutId: Int): Fragment(layoutId) {
            message,
            Snackbar.LENGTH_LONG
        ).show()
+    }
+
+    fun showToast(message: String) {
+        Toast(requireActivity().applicationContext).apply {
+            setText(message)
+            duration = Toast.LENGTH_LONG
+            show()
+        }
+
+//        Toast.makeText(requireActivity().applicationContext, message, Toast.LENGTH_LONG).show()
+
     }
 }

@@ -6,14 +6,14 @@ import io.ktor.http.HttpStatusCode.Companion.OK
 
 data class Resource<out T>(
     val status: Status,
-    val message: String?,
-    val data: T?,
-    val statusCode: HttpStatusCode = OK
+    val message: String? = null,
+    val data: T? = null,
+    val statusCode: HttpStatusCode? = null
 ) {
 
     companion object {
-        fun <T> success(message: String = "", data: T?): Resource<T> {
-            return Resource(Status.SUCCESS, message, data)
+        fun <T> success(message: String = "", data: T?, statusCode: HttpStatusCode = OK): Resource<T> {
+            return Resource(Status.SUCCESS, message, data, statusCode)
         }
 
         fun <T> error(message: String,
@@ -23,8 +23,8 @@ data class Resource<out T>(
             return Resource(Status.ERROR, message, data, statusCode)
         }
 
-        fun <T> loading(data: T? = null): Resource<T> {
-            return Resource(Status.LOADING, null, data)
+        fun <T> loading(message: String? = null, data: T? = null): Resource<T> {
+            return Resource(Status.LOADING, message, data)
         }
     }
 
