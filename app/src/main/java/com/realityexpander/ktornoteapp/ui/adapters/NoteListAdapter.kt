@@ -2,9 +2,7 @@ package com.realityexpander.ktornoteapp.ui.adapters
 
 import android.graphics.Color
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.AsyncListDiffer
@@ -16,8 +14,9 @@ import com.realityexpander.ktornoteapp.databinding.ItemNoteBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NoteAdapter: RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
+class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
 
+// old way of doing it
 //    inner class NoteViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 //
 //        fun bind(note: NoteEntity) {
@@ -39,12 +38,14 @@ class NoteAdapter: RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
     private val differ = AsyncListDiffer(this, diffCallback)
 
+    // Internal representation of the data
     var notes: List<NoteEntity>
         get() = differ.currentList
         set(value) {
             differ.submitList(value)
         }
 
+    // Create the view elements that will be populated with note data in onBindViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         val binding = ItemNoteBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -54,6 +55,7 @@ class NoteAdapter: RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
         return NoteViewHolder(binding)
 
+// old way
 //        return NoteViewHolder(
 //            LayoutInflater.from(parent.context).inflate(
 //                R.layout.item_note,
@@ -63,6 +65,7 @@ class NoteAdapter: RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 //        )
     }
 
+    // Called by the RecyclerView to bind the data to view element at the specified position.
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
         val note = notes[position]
         val bind = holder.binding
@@ -90,9 +93,57 @@ class NoteAdapter: RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
             }
         }
+
+        // Set the onClick function for this RecyclerView item
+        setOnItemClickListener {
+            onItemClickListener?.let { onItemClick ->
+                onItemClick(note)
+            }
+        }
     }
 
     override fun getItemCount(): Int {
         return notes.size
     }
+
+    // define lambda to handle click events on the RecyclerView
+    private var onItemClickListener: ((NoteEntity) -> Unit)? = null
+
+    fun setOnItemClickListener(clickListener: (NoteEntity) -> Unit) {
+        this.onItemClickListener = clickListener
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
