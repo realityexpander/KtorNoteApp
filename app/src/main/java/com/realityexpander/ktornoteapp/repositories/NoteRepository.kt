@@ -16,6 +16,8 @@ import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.HttpStatusCode.Companion.fromValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import javax.inject.Inject
@@ -78,26 +80,6 @@ class NoteRepository @Inject constructor(
             }
         )
     }
-
-//    fun testCrossinline(): Flow<Resource<Int>> {
-//        return networkBoundResource(
-//            queryDb = {
-//                flow { emit(1) }
-//            },
-//            fetchFromNetwork = {
-//                "hello"
-//            },
-//            debugRequestType = { request ->
-//                println(request)
-//            },
-//            debugResultType = { result ->
-//                println(result)
-//            },
-//            saveFetchResponseToDb = { response ->
-//                Unit
-//            }
-//        )
-//    }
 
     suspend fun deleteNoteFromApi(deleteNoteId: String) =
         callApi {
@@ -164,4 +146,44 @@ class NoteRepository @Inject constructor(
 
     //suspend fun getNotes() = notesDao.getAllNotes()
     suspend fun getNote(id: String) = notesDao.getNoteById(id)
+
+
+    /// Tests ///
+
+    fun testNetworkBoundResource(): Flow<Resource<Pair<String, String>>> {  // always returns a Flow of Resource of a type
+        // oldValue, newValue
+        var dbValue = Pair("stale DB value", "[no new value]")
+
+        return networkBoundResource(
+            queryDb = {
+                println("querying db...")
+
+                flow { emit(dbValue) }  // simulate a query emission from db
+            },
+            fetchFromNetwork = {
+                println("fetching from network...")
+
+                "fresh value"  // simulate network response
+            },
+            debugNwResponseType = { response ->
+                println("debugNwResponseType: '$response'")
+            },
+            debugDbResultType = { result ->
+                println("debugDbResultType: '$result'")
+            },
+            saveFetchResponseToDb = { response ->
+                println("Saving to DB: '$response'")
+                dbValue = Pair(response, dbValue.first)
+            }
+        )
+    }
+
+    fun runTestNetworkBoundResource() {
+        runBlocking {
+            val flow = testNetworkBoundResource()
+            flow.collect {
+                println(it)
+            }
+        }
+    }
 }

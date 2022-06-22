@@ -72,6 +72,8 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
             curEmail = binding.etLoginEmail.text.toString()
             curPassword = binding.etLoginPassword.text.toString()
 
+            viewModel.testCrossinline(); return@setOnClickListener
+
             viewModel.login(
                 curEmail ?: "",
                 curPassword ?: ""

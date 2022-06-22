@@ -98,4 +98,9 @@ class AuthViewModel @Inject constructor(
         ))
     }
 
+    fun testCrossinline() {
+        val result = repository.testNetworkBoundResource()
+        repository.runTestNetworkBoundResource()
+    }
+
 }

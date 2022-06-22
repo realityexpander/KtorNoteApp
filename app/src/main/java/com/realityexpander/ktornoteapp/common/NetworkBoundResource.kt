@@ -22,13 +22,13 @@ inline fun <DbResultType, NwResponseType> networkBoundResource(
     emit(Resource.loading(null))
 
     // get stale data from the database
-    val data = queryDb().first()
+    val staleData = queryDb().first()
 
     val flow =
         // check network connection
-        if (shouldFetch(data)) { // data is ignored
+        if (shouldFetch(staleData)) { // data is ignored
             // emit the data we have so far, if any (from the database)
-            emit(Resource.loading(null, data))
+            emit(Resource.loading(null, staleData))
 
             try {
                 // attempt to fetch fresh data from the network
@@ -62,42 +62,6 @@ inline fun <DbResultType, NwResponseType> networkBoundResource(
 
     emitAll(flow)  // shorthand for: flow.collect { value -> emit(value) }
 }
-
-//inline fun <ResultType, RequestType> networkBoundResource2(
-//    crossinline queryDb: () -> Flow<ResultType>,
-//    crossinline fetchFromNetwork: suspend () -> RequestType,
-//    crossinline saveFetchResultToDb: suspend (RequestType) -> Unit,
-//    crossinline onFetchFailed: (Throwable) -> Unit = { Unit },
-//    crossinline shouldFetch: (ResultType) -> Boolean = { true }
-//) = flow {
-//    emit(Resource.loading(null))
-//    val data = queryDb().first()
-//
-//    val flow = if(shouldFetch(data)) {
-//        emit(Resource.loading(data = data))
-//
-//        try {
-//            val fetchedResult = fetchFromNetwork()
-//            saveFetchResultToDb(fetchedResult)
-//            queryDb().map {
-//                Resource.success(data = it)
-//            }
-//        } catch (t: Throwable) {
-//            onFetchFailed(t)
-//            queryDb().map {
-//                Resource.error("Couldn't reach server. It might be down", data = it)
-//            }
-//        }
-//    } else {
-//        queryDb().map {
-//            Resource.success(data = it)
-//        }
-//    }
-//    emitAll(flow)
-//    flow.collect { value ->
-//        emit(value)
-//    }
-//}
 
 
 
