@@ -21,7 +21,7 @@ inline fun <DatabaseResultType, NetworkResponseType> networkBoundResource(
     // indicate that data is loading
     emit(Resource.loading(null))
 
-    // get stale data from the database
+    // get current (stale) data from the database
     val staleData = queryDb().first()
 
     val flow =
