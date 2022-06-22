@@ -3,7 +3,10 @@ package com.realityexpander.ktornoteapp.repositories
 import android.app.Application
 import com.google.gson.Gson
 import com.realityexpander.ktornoteapp.common.Resource
+import com.realityexpander.ktornoteapp.common.checkForInternetConnection
+import com.realityexpander.ktornoteapp.common.networkBoundResource
 import com.realityexpander.ktornoteapp.data.local.NotesDao
+import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.data.remote.NotesApi
 import com.realityexpander.ktornoteapp.data.remote.requests.AccountRequest
 import com.realityexpander.ktornoteapp.data.remote.requests.DeleteNoteRequest
@@ -12,6 +15,7 @@ import com.realityexpander.ktornoteapp.data.remote.responses.SimpleResponse
 import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.HttpStatusCode.Companion.fromValue
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import javax.inject.Inject
@@ -39,6 +43,61 @@ class NoteRepository @Inject constructor(
         callApi {
             notesApi.getNotes()
         }
+
+    fun getAllNotesCached(): Flow<Resource<List<NoteEntity>>> {
+        return networkBoundResource(
+            queryDb = {
+                notesDao.getAllNotes()
+            },
+            fetchFromNetwork = {
+                notesApi.getNotes()
+            },
+            saveFetchResponseToDb = { response ->
+                if(response.isSuccessful && response.body() != null) {
+                    //notesDao.insertAll(response.body()!!.data)
+                }
+//                response.body()!!.data?.let { notes ->
+//                    // notesDao.insertAll(notes)
+//                }
+                else {
+                    throw Exception("Error getting notes from API, response: code="
+                            + response.code() + ", "
+                            + response.message() + ", "
+                            + response.errorBody()?.string()
+                    )
+                }
+            },
+            shouldFetch = { _ ->
+                checkForInternetConnection(context)
+            },
+            debugNwResponseType = { response ->
+                println(response)
+            },
+            debugDbResultType = { result ->
+                println(result)
+            }
+        )
+    }
+
+//    fun testCrossinline(): Flow<Resource<Int>> {
+//        return networkBoundResource(
+//            queryDb = {
+//                flow { emit(1) }
+//            },
+//            fetchFromNetwork = {
+//                "hello"
+//            },
+//            debugRequestType = { request ->
+//                println(request)
+//            },
+//            debugResultType = { result ->
+//                println(result)
+//            },
+//            saveFetchResponseToDb = { response ->
+//                Unit
+//            }
+//        )
+//    }
 
     suspend fun deleteNoteFromApi(deleteNoteId: String) =
         callApi {
