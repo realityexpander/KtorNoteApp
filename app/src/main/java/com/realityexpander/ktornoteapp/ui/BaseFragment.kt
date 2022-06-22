@@ -17,11 +17,8 @@ abstract class BaseFragment(layoutId: Int): Fragment(layoutId) {
     fun showToast(message: String) {
         Toast(requireActivity().applicationContext).apply {
             setText(message)
-            duration = Toast.LENGTH_LONG
+            duration = Toast.LENGTH_SHORT
             show()
         }
-
-//        Toast.makeText(requireActivity().applicationContext, message, Toast.LENGTH_LONG).show()
-
     }
 }

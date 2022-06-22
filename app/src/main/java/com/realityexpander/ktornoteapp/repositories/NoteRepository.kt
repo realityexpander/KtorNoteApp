@@ -88,11 +88,15 @@ class NoteRepository @Inject constructor(
                 "Server Error: ${retrofitResponse.message()}"
             }
 
-            Resource.error(errorMessageFromServer, fromValue(retrofitResponse.code()), null)
+            Resource.error(errorMessageFromServer,
+                fromValue(retrofitResponse.code()), null
+            )
         } catch (e: Exception) {
             e.printStackTrace()
 
-            Resource.error(e.message ?: "Unknown error", InternalServerError, null)
+            Resource.error(e.message ?: "Unknown error",
+                InternalServerError, null
+            )
         }
     }
 
