@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 fun logoutFromViewModel(
     isLogoutDestructive: Boolean = false,
     repository: NoteRepository
-): Boolean {
+): Boolean {  // return true if logout was successful
     return runBlocking {
 
         // Only clear the DB if there are no unsynced notes, or
@@ -33,7 +33,7 @@ fun logoutFromViewModel(
 // To be called from the Fragment
 fun BaseFragment.logoutFromFragment(
     isLogoutDestructive: Boolean = false,
-    viewModelLogout: (isDestructive: Boolean) -> Boolean,
+    isViewModelLogoutSuccessful: (isDestructive: Boolean) -> Boolean,
     sharedPref: SharedPreferences,
     basicAuthInterceptor: BasicAuthInterceptor,
     navigationOnLogoutSuccess: () -> Unit,
@@ -50,7 +50,7 @@ fun BaseFragment.logoutFromFragment(
                 // Try logout again, but this time with destructive=true
                 logoutFromFragment(
                     isLogoutDestructive = true,  // logout destructively
-                    viewModelLogout,
+                    isViewModelLogoutSuccessful,
                     sharedPref,
                     basicAuthInterceptor,
                     navigationOnLogoutSuccess
@@ -64,12 +64,12 @@ fun BaseFragment.logoutFromFragment(
     }
 
 
-    val isLogoutSafe = viewModelLogout(isLogoutDestructive)
+    val isLogoutSafe = isViewModelLogoutSuccessful(isLogoutDestructive)
 
     if (isLogoutDestructive || isLogoutSafe) {
         showSnackbar("Logging out...")
 
-        viewModelLogout(true)
+        isViewModelLogoutSuccessful(true)
         removeAllCredentials(sharedPref, basicAuthInterceptor)
 
         navigationOnLogoutSuccess()

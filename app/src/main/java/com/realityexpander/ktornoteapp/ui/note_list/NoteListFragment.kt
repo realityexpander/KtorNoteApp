@@ -154,15 +154,12 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
 
         logoutFromFragment(
             isLogoutDestructive = isLogoutDestructive,
-            viewModelLogout = { isDestructive -> viewModel.logout(isDestructive) },
+            isViewModelLogoutSuccessful = { isDestructive -> viewModel.logout(isDestructive) },
             sharedPref = sharedPref,
             basicAuthInterceptor = basicAuthInterceptor
         ) {
             val navOptions = NavOptions.Builder()
-                .setPopUpTo(
-                    R.id.noteListFragment,
-                    true
-                ) // remove the noteListFragment from the back stack
+                .setPopUpTo(R.id.noteListFragment, true) // remove the noteListFragment from the back stack
                 .build()
             findNavController().navigate(
                 NoteListFragmentDirections.actionNotesListFragmentToAuthFragment(),
