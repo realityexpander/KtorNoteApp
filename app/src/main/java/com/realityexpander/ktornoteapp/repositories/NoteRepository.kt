@@ -86,8 +86,8 @@ class NoteRepository @Inject constructor(
                     return@networkBoundResource
                 }
 
-                throw Exception("Error getting notes from API, response: code="
-                        + response.code() + ", "
+                throw Exception("Error getting notes from API, " +
+                        "response: code=" + response.code() + ", "
                         + response.message() + ", "
                         + response.errorBody()?.string()
                 )
@@ -106,7 +106,7 @@ class NoteRepository @Inject constructor(
 
 
 
-    /// REMOTE = to/from API Only ///
+    /// REMOTE = to/from Api Only ///
 
     suspend fun registerApi(email: String, password: String): Resource<SimpleResponse> =
         callApi {

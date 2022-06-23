@@ -15,8 +15,8 @@ data class NoteEntity(
 
     val title: String,
     val content: String,
-    val date: String, //Long,
-    // val dateLong: Long,  // TODO add this
+    val date: String,
+    val dateMillis: Long = 0,
     val owners: List<String>,  // must use @TypeConverter to convert the list to a json string
     val color: String,
 
@@ -25,7 +25,6 @@ data class NoteEntity(
         serialize = false
     ) // Ignore for retrofit, not serialized/deserialized
     var isSynced: Boolean = false,
-    val dateMillis: Long
 )
 
 typealias NoteEntityList = List<NoteEntity>
