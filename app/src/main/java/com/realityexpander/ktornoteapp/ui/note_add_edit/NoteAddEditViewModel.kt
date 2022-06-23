@@ -41,10 +41,19 @@ class NoteAddEditViewModel @Inject constructor(
 
     }
 
-    fun getOwnerIdForEmail(authEmail: String?): String? {
-        return runBlocking {
-            repository.getOwnerIdForEmail(authEmail)
-        }
-    }
+
+
+
+// TESTING //
+
+// use to call from fragment:
+// val authUserId = viewModel.getOwnerIdForEmail(authEmail) ?: "unknown user id"
+//
+// Define in viewModel:
+//    fun getOwnerIdForEmail(authEmail: String?): String? {
+//        return runBlocking {
+//            repository.getOwnerIdForEmail(authEmail)
+//        }
+//    }
 
 }

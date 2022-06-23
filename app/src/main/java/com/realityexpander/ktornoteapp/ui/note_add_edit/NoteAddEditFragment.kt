@@ -9,10 +9,10 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import com.realityexpander.ktornoteapp.R
 import com.realityexpander.ktornoteapp.common.Constants.DEFAULT_NOTE_COLOR
-import com.realityexpander.ktornoteapp.common.Constants.ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_EMAIL
+import com.realityexpander.ktornoteapp.common.Constants.ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_USER_ID
 import com.realityexpander.ktornoteapp.common.Status
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
-import com.realityexpander.ktornoteapp.data.local.entities.millisToDate
+import com.realityexpander.ktornoteapp.data.local.entities.millisToDateString
 import com.realityexpander.ktornoteapp.databinding.FragmentNoteAddEditBinding
 import com.realityexpander.ktornoteapp.ui.BaseFragment
 import com.realityexpander.ktornoteapp.ui.common.setDrawableColorTint
@@ -92,9 +92,9 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
 
 
     private fun saveNote() {
-        val authEmail = sharedPref.getString(
-            ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_EMAIL, null
-        )
+        val authUserId = sharedPref.getString(
+            ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_USER_ID, "Unknown user"
+        ) ?: "Unknown user"
 
         val title = binding.etNoteTitle.text.toString()
         val content = binding.etNoteContent.text.toString()
@@ -103,8 +103,7 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
             return
         }
 
-        val dateMillis = System.currentTimeMillis()  // TODO SAVE THIS AS A LONG too
-        val authUserId = viewModel.getOwnerIdForEmail(authEmail) ?: "unknown user id"
+        val dateMillis = System.currentTimeMillis()
 
         val note = NoteEntity(
             id = curNote?.id ?: UUID.randomUUID().toString(),
@@ -113,7 +112,8 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
             color = curNoteColor,
             owners = if(curNote?.owners.isNullOrEmpty()) listOf(authUserId)
                 else curNote?.owners ?: listOf(authUserId),
-            date = millisToDate(dateMillis),
+            date = millisToDateString(dateMillis),
+            dateMillis = dateMillis
         )
 
         viewModel.upsertNote(note)

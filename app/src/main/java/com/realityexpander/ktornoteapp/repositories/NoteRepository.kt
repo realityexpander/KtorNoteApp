@@ -31,7 +31,7 @@ class NoteRepository @Inject constructor(
     private val gson: Gson
 ) {
 
-    /// CACHED
+    /// CACHED = uses Api and local database
     ///  ≈ Api -> Database --> UI
     ///  ≈ Database -> Api -> Database --> UI (as Flow of Resource)
 
@@ -140,7 +140,7 @@ class NoteRepository @Inject constructor(
         return response.data?.data
     }
 
-    // Standardized call to the API returns a `Resource.<status>` object
+    // Standardized call to the API returns a `Resource.<status>` object, possibly with Data
     private suspend fun <T : BaseSimpleResponse> callApi(
         call: suspend () -> Response<out T>
     ): Resource<T> = withContext(Dispatchers.IO) {
@@ -197,10 +197,20 @@ class NoteRepository @Inject constructor(
     }
 
 
+
     /// LOCAL DATABASE = to/from local database ONLY ///
 
     //suspend fun getNotes() = notesDao.getAllNotes()
     suspend fun getNoteByIdDb(noteId: String) = notesDao.getNoteById(noteId)
+
+    // Delete all notes
+    suspend fun deleteAllNotesDb() = notesDao.deleteAllNotes()
+
+    // Get all unsynced notes
+    suspend fun getUnsyncedNotesDb() = notesDao.getAllUnsyncedNotes()
+
+
+
 
 
     /// Tests ///

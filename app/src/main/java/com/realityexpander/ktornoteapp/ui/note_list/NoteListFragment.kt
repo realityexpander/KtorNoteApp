@@ -5,21 +5,18 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.realityexpander.ktornoteapp.R
-import com.realityexpander.ktornoteapp.common.Constants
 import com.realityexpander.ktornoteapp.common.Status
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.data.remote.BasicAuthInterceptor
 import com.realityexpander.ktornoteapp.databinding.FragmentNoteListBinding
 import com.realityexpander.ktornoteapp.ui.BaseFragment
 import com.realityexpander.ktornoteapp.ui.adapters.NoteListAdapter
-import com.realityexpander.ktornoteapp.ui.common.removeAllCredentials
+import com.realityexpander.ktornoteapp.ui.common.logoutFromFragment
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -109,8 +106,9 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
                                     title = "No notes found",
                                     content = "",
                                     date = "Add a note to get started",
+                                    owners = listOf(""),
                                     color = "#FFFFFF",
-                                    owners = listOf("")
+                                    dateMillis = 0
                                 )
                             )
 
@@ -152,16 +150,47 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         layoutManager = LinearLayoutManager(requireContext())
     }
 
-    private fun logout() {
-        removeAllCredentials(sharedPref, basicAuthInterceptor)
+    private fun logout(isLogoutDestructive: Boolean = false) {
+//        val isLogoutSafe = viewModel.logout()
+//
+//        if (isLogoutDestructive || isLogoutSafe) {
+//
+//            showSnackbar("Logging out...")
+//
+//            viewModel.logout(isLogoutDestructive = true)
+//            removeAllCredentials(sharedPref, basicAuthInterceptor)
+//
+//            val navOptions = NavOptions.Builder()
+//                .setPopUpTo(
+//                    R.id.noteListFragment,
+//                    true
+//                ) // remove the noteListFragment from the back stack
+//                .build()
+//            findNavController().navigate(
+//                NoteListFragmentDirections.actionNotesListFragmentToAuthFragment(),
+//                navOptions
+//            )
+//        } else {
+//            showLogoutWarningDialog()
+//        }
 
-        val navOptions = NavOptions.Builder()
-            .setPopUpTo(R.id.noteListFragment, true) // remove the noteListFragment from the back stack
-            .build()
-        findNavController().navigate(
-            NoteListFragmentDirections.actionNotesListFragmentToAuthFragment(),
-            navOptions
-        )
+        logoutFromFragment(
+            isLogoutDestructive = isLogoutDestructive,
+            viewModelLogout = { isDestructive -> viewModel.logout(isDestructive) },
+            sharedPref = sharedPref,
+            basicAuthInterceptor = basicAuthInterceptor
+        ) {
+            val navOptions = NavOptions.Builder()
+                .setPopUpTo(
+                    R.id.noteListFragment,
+                    true
+                ) // remove the noteListFragment from the back stack
+                .build()
+            findNavController().navigate(
+                NoteListFragmentDirections.actionNotesListFragmentToAuthFragment(),
+                navOptions
+            )
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -180,4 +209,16 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         super.onDestroyView()
         _binding = null
     }
+
+//    // show dialog to confirm logout
+//    private fun showLogoutWarningDialog() {
+//        val dialog = AlertDialog.Builder(requireContext())
+//            .setTitle("Logout")
+//            .setMessage("There are unsynced/unsaved notes that will be deleted if you log out now.\n\nAre you sure you want to logout?")
+//            .setPositiveButton("Yes") { _, _ -> logout(isLogoutDestructive = true) }
+//            .setNegativeButton("No") { _, _ -> }
+//            .create()
+//        dialog.show()
+//    }
+
 }

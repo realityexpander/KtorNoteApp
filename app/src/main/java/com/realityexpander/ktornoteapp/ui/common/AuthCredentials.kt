@@ -14,6 +14,7 @@ fun removeAllCredentials(
     sharedPref.edit()
         .remove(ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_EMAIL)
         .remove(ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_PASSWORD)
+        .remove(ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_USER_ID)
         .apply()
 
     basicAuthInterceptor.clearCredentials()

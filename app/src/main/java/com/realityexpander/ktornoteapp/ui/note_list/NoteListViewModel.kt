@@ -5,10 +5,8 @@ import com.realityexpander.ktornoteapp.common.Event
 import com.realityexpander.ktornoteapp.common.Resource
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.repositories.NoteRepository
+import com.realityexpander.ktornoteapp.ui.common.logoutFromViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +26,21 @@ class NoteListViewModel @Inject constructor(
     val allNotes:LiveData<Event<Resource<List<NoteEntity>>>> = _allNotes
 
 
+    fun logout(isLogoutDestructive: Boolean = false): Boolean {
+//        return runBlocking {
+//
+//            // Only clear the DB if there are no unsynced notes, or
+//            // the user wants to logout destructively.
+//            if (logoutDestructively || repository.getUnsyncedNotesDb().isEmpty()) {
+//                repository.deleteAllNotesDb()
+//
+//                return@runBlocking true
+//            }
+//
+//            false
+//        }
+        return logoutFromViewModel(isLogoutDestructive, repository)
+    }
 
 
     ////// TESTING ///////

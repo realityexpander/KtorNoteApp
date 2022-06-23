@@ -37,7 +37,9 @@ object AppModule {
         context,
         NotesDatabase::class.java,
         DATABASE_NAME
-    ).build()
+    )
+        .fallbackToDestructiveMigration()
+        .build()
 
     @Singleton
     @Provides

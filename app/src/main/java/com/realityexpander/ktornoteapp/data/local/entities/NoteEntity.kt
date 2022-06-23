@@ -17,16 +17,20 @@ data class NoteEntity(
     val content: String,
     val date: String, //Long,
     // val dateLong: Long,  // TODO add this
-    val owners : List<String>,  // must use @TypeConverter to convert the list to a json string
+    val owners: List<String>,  // must use @TypeConverter to convert the list to a json string
     val color: String,
 
-    @Expose(deserialize = false, serialize = false) // Ignore for retrofit, not serialized/deserialized
-    var isSynced: Boolean = false
+    @Expose(
+        deserialize = false,
+        serialize = false
+    ) // Ignore for retrofit, not serialized/deserialized
+    var isSynced: Boolean = false,
+    val dateMillis: Long
 )
 
 typealias NoteEntityList = List<NoteEntity>
 
-fun millisToDate(longMillis: Long): String {
+fun millisToDateString(longMillis: Long): String {
     val dateFormat = SimpleDateFormat("MM/dd/yyyy, HH:mm", Locale.getDefault())
 
     return dateFormat.format(longMillis)
