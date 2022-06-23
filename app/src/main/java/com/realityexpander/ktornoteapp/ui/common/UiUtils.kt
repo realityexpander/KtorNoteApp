@@ -23,16 +23,23 @@ fun TextInputEditText.onImeDone(callback: () -> Unit) {
 fun setDrawableColorTint(
     view: View,
     drawableId: Int,
-    tintColor: String = "#FFFFFF",
+    tintColorStr: String = "#FFFFFF",
     resources: Resources
 ) {
+    // Make sure its in hex format
+    val tintColorStrHexFormat =
+        if(!tintColorStr.startsWith("#")) {
+            "#$tintColorStr"
+        } else
+            tintColorStr
+
     val drawable = ResourcesCompat.getDrawable(resources, drawableId, null)
     drawable?.let {
         try {
             val wrappedDrawable = DrawableCompat.wrap(it)
-            val color = Color.parseColor(tintColor)
+            val color = Color.parseColor(tintColorStrHexFormat)
             DrawableCompat.setTint(wrappedDrawable, color)
-            view.background = it // wrappedDrawable
+            view.background = wrappedDrawable
         } catch (e: Exception) {
             e.printStackTrace()
         }

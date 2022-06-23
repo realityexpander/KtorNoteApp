@@ -22,6 +22,7 @@ class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
 
     inner class NoteViewHolder(val binding: ItemNoteBinding): RecyclerView.ViewHolder(binding.root)
 
+    // Setup differ to track changes in the list of notes
     private val diffCallback = object: DiffUtil.ItemCallback<NoteEntity>() {
         override fun areItemsTheSame(oldItem: NoteEntity, newItem: NoteEntity): Boolean {
             return oldItem.id == newItem.id
@@ -31,8 +32,7 @@ class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
             return oldItem.hashCode() == newItem.hashCode()
         }
     }
-
-    // Works on the background thread
+    // Setup differ to work on the background thread
     private val differ = AsyncListDiffer(this, diffCallback)
 
     // Internal representation of the data
@@ -77,8 +77,8 @@ class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
                 resources
             )
 
-            // Set the onClick function for this RecyclerView item
-            setOnItemClickListener {
+            // Set the onClickListener callback function for this RecyclerView item
+            setOnClickListener {
                 onItemClickListener?.let { onItemClick ->
                     onItemClick(note)
                 }

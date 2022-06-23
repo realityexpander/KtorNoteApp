@@ -20,15 +20,16 @@ data class NoteEntity(
     val owners: List<String>,  // must use @TypeConverter to convert the list to a json string
     val color: String,
 
-    @Expose(
+    @Expose( // Ignore for retrofit, don't serialize/deserialize
         deserialize = false,
         serialize = false
-    ) // Ignore for retrofit, not serialized/deserialized
+    )
     var isSynced: Boolean = false,
 )
 
-typealias NoteEntityList = List<NoteEntity>
+typealias NoteEntities = List<NoteEntity>
 
+// Standard date format for Room
 fun millisToDateString(longMillis: Long): String {
     val dateFormat = SimpleDateFormat("MM/dd/yyyy, HH:mm", Locale.getDefault())
 

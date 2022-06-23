@@ -16,9 +16,12 @@ import com.realityexpander.ktornoteapp.data.local.entities.millisToDateString
 import com.realityexpander.ktornoteapp.databinding.FragmentNoteAddEditBinding
 import com.realityexpander.ktornoteapp.ui.BaseFragment
 import com.realityexpander.ktornoteapp.ui.common.setDrawableColorTint
+import com.realityexpander.ktornoteapp.ui.dialogs.ColorPickerDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 import javax.inject.Inject
+
+const val FRAGMENT_TAG = "NoteAddEditFragment"
 
 @AndroidEntryPoint
 class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
@@ -56,6 +59,49 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Restore ColorPickerDialogFragment state from config change
+        if (savedInstanceState != null) {
+            val colorPickerDialog = parentFragmentManager.findFragmentByTag(FRAGMENT_TAG)
+                as ColorPickerDialogFragment?  // make this cast nullable to avoid crash
+            colorPickerDialog?.setPositiveListener { colorStr ->
+                curNoteColor = colorStr
+                changeViewNoteColor(colorStr)
+            }
+        }
+
+        // Setup ColorPickerDialogFragment
+        binding.viewNoteColor.setOnClickListener {
+            ColorPickerDialogFragment().apply {
+                setPositiveListener { colorStr ->
+                    curNoteColor = colorStr
+                    changeViewNoteColor(colorStr)
+                }
+            }.show(parentFragmentManager, FRAGMENT_TAG) // FRAGMENT_TAG is to identify the dialog fragment upon config changes
+        }
+
+        // TODO Add save button to toolbar
+//        binding.saveButton.setOnClickListener {
+//            saveNote()
+//        }
+    }
+
+    private fun changeViewNoteColor(newColorString: String) {
+        setDrawableColorTint(binding.viewNoteColor,
+            R.drawable.circle_shape,
+            newColorString,
+            resources
+        )
+        curNoteColor = newColorString
+    }
+
+    override fun onPause() {
+        super.onPause()
+        saveNote()
+    }
+
     private fun subscribeToObservers() {
         viewModel.note.observe(viewLifecycleOwner) { eventResource ->
             if (!eventResource.hasBeenHandled) {
@@ -65,6 +111,7 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
                         Status.SUCCESS -> {
                             resourceNote.data?.let { note ->
                                 curNote = note
+                                curNoteColor = note.color
                                 binding.etNoteTitle.setText(note.title)
                                 binding.etNoteContent.setText(note.content)
                                 setDrawableColorTint(binding.viewNoteColor,
@@ -79,10 +126,10 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
                             showSnackbar(resourceNote.message ?: "An Error occurred")
                         }
                         Status.ERROR -> {
-                            showSnackbar(resourceNote.message ?: "An Error occurred")
+                            showSnackbar(resourceNote.message ?: "Note not found")
                         }
                         Status.LOADING -> {
-                            // showLoading()
+                            // do nothing
                         }
                     }
                 }
@@ -103,6 +150,7 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
             return
         }
 
+        // Update the date to the current time
         val dateMillis = System.currentTimeMillis()
 
         val note = NoteEntity(

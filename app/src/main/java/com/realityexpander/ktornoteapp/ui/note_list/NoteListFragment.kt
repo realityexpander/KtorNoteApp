@@ -60,9 +60,10 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         // Set the item click listener for the Notes List items
         noteListAdapter.setOnItemClickListener { note ->
             if (note.id.isNotBlank()) {
-                findNavController().navigate(
-                    NoteListFragmentDirections.actionNotesListFragmentToNoteDetailFragment(note.id),
-                )
+                findNavController()
+                    .navigate(NoteListFragmentDirections
+                        .actionNotesListFragmentToNoteDetailFragment(note.id)
+                    )
 
                 return@setOnItemClickListener
             }
@@ -71,7 +72,10 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         }
 
         binding.fabAddNote.setOnClickListener {
-            findNavController().navigate(NoteListFragmentDirections.actionNotesListFragmentToAddEditNoteFragment(""))
+            findNavController()
+                .navigate(NoteListFragmentDirections
+                    .actionNotesListFragmentToAddEditNoteFragment("")
+                )
         }
 
 

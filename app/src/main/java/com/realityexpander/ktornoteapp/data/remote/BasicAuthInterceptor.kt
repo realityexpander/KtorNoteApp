@@ -4,6 +4,8 @@ import com.realityexpander.ktornoteapp.common.Constants.PUBLIC_ENDPOINTS
 import okhttp3.Credentials
 import okhttp3.Interceptor
 import okhttp3.Response
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 class BasicAuthInterceptor: Interceptor {
     var email: String? = null
@@ -20,14 +22,22 @@ class BasicAuthInterceptor: Interceptor {
         val request = chain.request()
 
         // Check for publicly-accessible API endpoints
-        if(request.url.encodedPath in PUBLIC_ENDPOINTS) {
+        if (request.url.encodedPath in PUBLIC_ENDPOINTS) {
             return chain.proceed(request)
         }
 
-        val authenticatedRequest = request.newBuilder()
-            .header("Authorization", Credentials.basic(email ?: "", password ?: ""))
-            .build()
-        return chain.proceed(authenticatedRequest)
+        try {
+            // Add basic auth credentials to request
+            val authenticatedRequest = request.newBuilder()
+                .header("Authorization", Credentials.basic(email ?: "", password ?: ""))
+                .build()
+            return chain.proceed(authenticatedRequest)
+        } catch (e: TimeoutException) {
+            return chain.withConnectTimeout(10, TimeUnit.SECONDS).proceed(request)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e
+        }
     }
 
     fun setCredentials(email: String, password: String) {
