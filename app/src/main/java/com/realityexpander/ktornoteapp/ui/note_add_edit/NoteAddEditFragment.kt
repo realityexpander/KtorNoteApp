@@ -49,8 +49,8 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
         savedInstanceState: Bundle?
     ): View {
 
-        if (args.id.isNotEmpty()) {
-            viewModel.getNoteById(args.id)
+        if (args.noteId.isNotEmpty()) {
+            viewModel.getNoteById(args.noteId)
             subscribeToObservers()
         }
 

@@ -4,11 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.realityexpander.ktornoteapp.R
 import com.realityexpander.ktornoteapp.databinding.FragmentNoteDetailBinding
 import com.realityexpander.ktornoteapp.ui.BaseFragment
 
 class NoteDetailFragment: BaseFragment(R.layout.fragment_note_detail) {
+
+    private val args: NoteDetailFragmentArgs by navArgs()
 
     private var _binding: FragmentNoteDetailBinding? = null
     // This property is only valid between onCreateView and
@@ -23,6 +27,15 @@ class NoteDetailFragment: BaseFragment(R.layout.fragment_note_detail) {
         _binding = FragmentNoteDetailBinding.inflate(inflater, container, false)
         val view = binding.root
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.fabEditNote.setOnClickListener {
+            findNavController()
+                .navigate(NoteDetailFragmentDirections.actionNoteDetailFragmentToAddEditNoteFragment(args.noteId))
+        }
     }
 
     override fun onDestroyView() {

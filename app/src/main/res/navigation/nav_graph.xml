@@ -9,7 +9,7 @@
         android:name="com.realityexpander.ktornoteapp.ui.note_add_edit.NoteAddEditFragment"
         android:label="AddEditNoteFragment" >
         <argument
-            android:name="id"
+            android:name="noteId"
             app:argType="string" />
     </fragment>
     <fragment
@@ -28,7 +28,7 @@
             android:id="@+id/action_noteDetailFragment_to_addEditNoteFragment"
             app:destination="@id/addEditNoteFragment" />
         <argument
-            android:name="id"
+            android:name="noteId"
             app:argType="string" />
     </fragment>
     <fragment
