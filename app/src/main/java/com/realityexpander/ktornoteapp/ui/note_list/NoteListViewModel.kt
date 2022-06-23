@@ -27,18 +27,6 @@ class NoteListViewModel @Inject constructor(
 
 
     fun logout(isLogoutDestructive: Boolean = false): Boolean {
-//        return runBlocking {
-//
-//            // Only clear the DB if there are no unsynced notes, or
-//            // the user wants to logout destructively.
-//            if (logoutDestructively || repository.getUnsyncedNotesDb().isEmpty()) {
-//                repository.deleteAllNotesDb()
-//
-//                return@runBlocking true
-//            }
-//
-//            false
-//        }
         return logoutFromViewModel(isLogoutDestructive, repository)
     }
 

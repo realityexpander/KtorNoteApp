@@ -38,7 +38,6 @@ fun BaseFragment.logoutFromFragment(
     basicAuthInterceptor: BasicAuthInterceptor,
     navigationOnLogoutSuccess: () -> Unit,
 ) {
-
     // show dialog to confirm destructive logout
     fun showLogoutWarningDialog() {
         val dialog = AlertDialog.Builder(requireContext())
@@ -48,6 +47,7 @@ fun BaseFragment.logoutFromFragment(
                         "\n\nAre you sure you want to logout?"
             )
             .setPositiveButton("Yes") { _, _ ->
+                // Try logout again, but this time with destructive=true
                 logoutFromFragment(
                     isLogoutDestructive = true,  // logout destructively
                     viewModelLogout,
@@ -63,9 +63,10 @@ fun BaseFragment.logoutFromFragment(
         dialog.show()
     }
 
-    val isLogoutSafe = viewModelLogout(isLogoutDestructive)
-    if (isLogoutDestructive || isLogoutSafe) {
 
+    val isLogoutSafe = viewModelLogout(isLogoutDestructive)
+
+    if (isLogoutDestructive || isLogoutSafe) {
         showSnackbar("Logging out...")
 
         viewModelLogout(true)

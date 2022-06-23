@@ -151,28 +151,6 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
     }
 
     private fun logout(isLogoutDestructive: Boolean = false) {
-//        val isLogoutSafe = viewModel.logout()
-//
-//        if (isLogoutDestructive || isLogoutSafe) {
-//
-//            showSnackbar("Logging out...")
-//
-//            viewModel.logout(isLogoutDestructive = true)
-//            removeAllCredentials(sharedPref, basicAuthInterceptor)
-//
-//            val navOptions = NavOptions.Builder()
-//                .setPopUpTo(
-//                    R.id.noteListFragment,
-//                    true
-//                ) // remove the noteListFragment from the back stack
-//                .build()
-//            findNavController().navigate(
-//                NoteListFragmentDirections.actionNotesListFragmentToAuthFragment(),
-//                navOptions
-//            )
-//        } else {
-//            showLogoutWarningDialog()
-//        }
 
         logoutFromFragment(
             isLogoutDestructive = isLogoutDestructive,
@@ -209,16 +187,5 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         super.onDestroyView()
         _binding = null
     }
-
-//    // show dialog to confirm logout
-//    private fun showLogoutWarningDialog() {
-//        val dialog = AlertDialog.Builder(requireContext())
-//            .setTitle("Logout")
-//            .setMessage("There are unsynced/unsaved notes that will be deleted if you log out now.\n\nAre you sure you want to logout?")
-//            .setPositiveButton("Yes") { _, _ -> logout(isLogoutDestructive = true) }
-//            .setNegativeButton("No") { _, _ -> }
-//            .create()
-//        dialog.show()
-//    }
 
 }
