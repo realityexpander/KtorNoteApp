@@ -51,6 +51,39 @@ class NoteRepository @Inject constructor(
             notesApi.deleteNote(DeleteNoteRequest(deleteNoteId))
         }
 
+    suspend fun upsertNoteCached(note: NoteEntity) {
+
+        // Attempt upsert on the server first
+        val response = try {
+            notesApi.addNote(note)
+        } catch (e: Exception) {
+            null
+        }
+
+        // Attempt upsert on the local database
+        if (response != null && response.isSuccessful) {
+            val body = response.body()
+            if (body != null) {
+                // force the note Id to match the one from the server
+                val noteId = body.data?.id
+
+                if (noteId != null) {
+                    notesDao.upsertNote(note.apply { isSynced = true; id = noteId })
+                }
+            }
+        } else {
+            // If the server failed to add the note, then attempt to update the local database
+            // and set the note as not synced.
+            notesDao.upsertNote(note.apply { isSynced = false })
+        }
+    }
+
+    suspend fun upsertNotesCached(notes: List<NoteEntity>) {
+        notes.forEach { note ->
+            upsertNoteCached(note)
+        }
+    }
+
     fun getAllNotesCached(): Flow<Resource<List<NoteEntity>>> {
         return networkBoundResource(
             queryDb = {
@@ -61,20 +94,18 @@ class NoteRepository @Inject constructor(
             },
             saveFetchResponseToDb = { response ->
                 if(response.isSuccessful && response.body() != null) {
-                    //notesDao.insertAll(response.body()!!.data)
+                    upsertNotesCached(response.body()!!.data ?: emptyList())
+
+                    return@networkBoundResource
                 }
-//                response.body()!!.data?.let { notes ->
-//                    // notesDao.insertAll(notes)
-//                }
-                else {
-                    throw Exception("Error getting notes from API, response: code="
-                            + response.code() + ", "
-                            + response.message() + ", "
-                            + response.errorBody()?.string()
-                    )
-                }
+
+                throw Exception("Error getting notes from API, response: code="
+                        + response.code() + ", "
+                        + response.message() + ", "
+                        + response.errorBody()?.string()
+                )
             },
-            shouldFetch = { _ ->
+            shouldFetch = { _->
                 isInternetConnected(context)
             },
             debugNetworkResponseType = { response ->

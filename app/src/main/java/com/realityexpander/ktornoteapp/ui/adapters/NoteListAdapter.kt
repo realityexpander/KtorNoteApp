@@ -16,13 +16,6 @@ import java.util.*
 
 class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
 
-// old way of doing it
-//    inner class NoteViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-//
-//        fun bind(note: NoteEntity) {
-//
-//        }
-//    }
 
     inner class NoteViewHolder(val binding: ItemNoteBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -36,6 +29,7 @@ class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
         }
     }
 
+    // Works on the background thread
     private val differ = AsyncListDiffer(this, diffCallback)
 
     // Internal representation of the data
@@ -54,18 +48,10 @@ class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
         )
 
         return NoteViewHolder(binding)
-
-// old way
-//        return NoteViewHolder(
-//            LayoutInflater.from(parent.context).inflate(
-//                R.layout.item_note,
-//                parent,
-//                false
-//            )
-//        )
     }
 
-    // Called by the RecyclerView to bind the data to view element at the specified position.
+    // Called by the RecyclerView to bind the note item data to
+    // a view element at the specified position.
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
         val note = notes[position]
         val bind = holder.binding
@@ -80,35 +66,34 @@ class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
                 bind.tvSynced.text = "Synced"
             }
 
-            val dateFormat = SimpleDateFormat("MM/dd/yyyy, HH:mm", Locale.getDefault())
-            val dateString = dateFormat.format(note.date)
-            bind.tvDate.text = dateString
+            bind.tvDate.text = note.date
 
             val drawable = ResourcesCompat.getDrawable(resources, R.drawable.circle_shape, null)
             drawable?.let {
                 val wrappedDrawable = DrawableCompat.wrap(it)
-                val color = Color.parseColor("#${note.color}")
+                val color = Color.parseColor("${note.color}")
                 DrawableCompat.setTint(wrappedDrawable, color)
                 bind.viewNoteColor.background = it // wrappedDrawable
+            }
 
+            // Set the onClick function for this RecyclerView item
+            setOnItemClickListener {
+                onItemClickListener?.let { onItemClick ->
+                    onItemClick(note)
+                }
             }
         }
 
-        // Set the onClick function for this RecyclerView item
-        setOnItemClickListener {
-            onItemClickListener?.let { onItemClick ->
-                onItemClick(note)
-            }
-        }
     }
 
     override fun getItemCount(): Int {
         return notes.size
     }
 
-    // define lambda to handle click events on the RecyclerView
+    // the lambda to use for click events on the RecyclerView
     private var onItemClickListener: ((NoteEntity) -> Unit)? = null
 
+    // sets a function to be used for the item's onClickListener
     fun setOnItemClickListener(clickListener: (NoteEntity) -> Unit) {
         this.onItemClickListener = clickListener
     }

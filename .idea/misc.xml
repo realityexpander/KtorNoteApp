@@ -10,6 +10,7 @@
         <entry key="app/src/main/res/layout/fragment_add_edit_note.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_auth.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_note_detail.xml" value="0.19479166666666667" />
+        <entry key="app/src/main/res/layout/fragment_note_list.xml" value="0.1828774062816616" />
         <entry key="app/src/main/res/layout/fragment_notes.xml" value="0.19479166666666667" />
         <entry key="app/src/main/res/layout/item_note.xml" value="0.25" />
       </map>

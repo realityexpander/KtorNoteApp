@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.realityexpander.ktornoteapp.R
 import com.realityexpander.ktornoteapp.common.Status
+import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.data.remote.BasicAuthInterceptor
 import com.realityexpander.ktornoteapp.databinding.FragmentNoteListBinding
 import com.realityexpander.ktornoteapp.ui.BaseFragment
@@ -57,10 +58,17 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         setupRecyclerView()
         subscribeToObservers()
 
+        // Set the item click listener for the Notes List items
         noteListAdapter.setOnItemClickListener { note ->
-            findNavController().navigate(
-                NoteListFragmentDirections.actionNotesListFragmentToNoteDetailFragment(note.id),
-            )
+            if (note.id.isNotBlank()) {
+                findNavController().navigate(
+                    NoteListFragmentDirections.actionNotesListFragmentToNoteDetailFragment(note.id),
+                )
+
+                return@setOnItemClickListener
+            }
+
+            showSnackbar("Note ID is empty")
         }
 
         binding.fabAddNote.setOnClickListener {
@@ -76,16 +84,32 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
 
                 when (result.status) {
                     Status.SUCCESS -> {
-                        binding.swipeRefreshLayout.isRefreshing = true
+                        binding.swipeRefreshLayout.isRefreshing = false
 
-                        noteListAdapter.notes = result.data ?: emptyList()
+                        // Should use a special XML item for this (TODO)
+                        if (result.data.isNullOrEmpty()) {
+                            noteListAdapter.notes = listOf(
+                                NoteEntity(
+                                    id = "",
+                                    title = "No notes found",
+                                    content = "Add a note to get started",
+                                    date = "01/01/2022, 12:00",
+                                    color = "FFFFFF",
+                                    owners = listOf("")
+                                )
+                            )
+
+                            return@let
+                        }
+
+                        noteListAdapter.notes = result.data
                     }
                     Status.ERROR -> {
-                        binding.swipeRefreshLayout.isRefreshing = true
+                        binding.swipeRefreshLayout.isRefreshing = false
 
                         event.getContentIfNotHandled()?.let { errorResource ->
                             errorResource.message?.let { message ->
-                                showSnackbar(result.message ?: "Unknown error")
+                                showSnackbar(message)
                             }
                         }
 

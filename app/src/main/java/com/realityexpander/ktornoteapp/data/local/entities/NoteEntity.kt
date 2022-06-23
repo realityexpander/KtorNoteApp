@@ -1,24 +1,32 @@
 package com.realityexpander.ktornoteapp.data.local.entities
 
-import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.Expose
+import java.text.SimpleDateFormat
 import java.util.*
+
+// This NoteEntity is used for database, network and UI (TODO should be separated!)
 
 @Entity(tableName = "notes") // for Room
 data class NoteEntity(
-    @PrimaryKey(autoGenerate = false)
-    val id: String = UUID.randomUUID().toString(),  // id generated here
+    @PrimaryKey(autoGenerate = false)  // dont let Room generate id
+    var id: String = UUID.randomUUID().toString(),  // id generated here
 
     val title: String,
     val content: String,
     val date: String, //Long,
-    val owners : List<String>,  // must use TypeConverter to convert the list to a json string
+    val owners : List<String>,  // must use @TypeConverter to convert the list to a json string
     val color: String,
 
-    @Expose(deserialize = false, serialize = false) // Ignored by retrofit and not serialized/deserialized
-    val isSynced: Boolean = false
+    @Expose(deserialize = false, serialize = false) // Ignore for retrofit, not serialized/deserialized
+    var isSynced: Boolean = false
 )
 
 typealias NoteEntityList = List<NoteEntity>
+
+fun longToDate(long: Long): String {
+    val dateFormat = SimpleDateFormat("MM/dd/yyyy, HH:mm", Locale.getDefault())
+
+    return dateFormat.format(long)
+}

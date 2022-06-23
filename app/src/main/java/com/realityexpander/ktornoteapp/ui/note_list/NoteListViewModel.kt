@@ -6,9 +6,10 @@ import com.realityexpander.ktornoteapp.common.Resource
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.repositories.NoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 @HiltViewModel
-class NoteListViewModel constructor(
+class NoteListViewModel @Inject constructor(
     private val noteRepository: NoteRepository
 ) : ViewModel() {
 
