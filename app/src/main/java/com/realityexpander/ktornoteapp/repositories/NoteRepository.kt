@@ -3,6 +3,7 @@ package com.realityexpander.ktornoteapp.repositories
 import android.app.Application
 import com.google.gson.Gson
 import com.realityexpander.ktornoteapp.common.Resource
+import com.realityexpander.ktornoteapp.common.Status
 import com.realityexpander.ktornoteapp.common.isInternetConnected
 import com.realityexpander.ktornoteapp.common.networkBoundResource
 import com.realityexpander.ktornoteapp.data.local.NotesDao
@@ -29,38 +30,22 @@ class NoteRepository @Inject constructor(
     private val notesApi: NotesApi,
     private val gson: Gson
 ) {
-    /// Remote API ///
 
-    suspend fun register(email: String, password: String) =
-        callApi {
-            notesApi.register(AccountRequest(email, password))
-        }
+    /// CACHED
+    ///  ≈ Api -> Database --> UI
+    ///  ≈ Database -> Api -> Database --> UI (as Flow of Resource)
 
-    suspend fun login(email: String, password: String) =
-        callApi {
-            notesApi.login(AccountRequest(email, password))
-        }
-
-    suspend fun getNotesFromApi() =
-        callApi {
-            notesApi.getNotes()
-        }
-
-    suspend fun deleteNoteFromApi(deleteNoteId: String) =
-        callApi {
-            notesApi.deleteNote(DeleteNoteRequest(deleteNoteId))
-        }
-
+    // Api -> Database --> UI
     suspend fun upsertNoteCached(note: NoteEntity) {
 
-        // Attempt upsert on the server first
+        // Attempt upsert via Api first
         val response = try {
             notesApi.addNote(note)
         } catch (e: Exception) {
             null
         }
 
-        // Attempt upsert on the local database
+        // Attempt upsert on the local Database
         if (response != null && response.isSuccessful) {
             val body = response.body()
             if (body != null) {
@@ -78,12 +63,14 @@ class NoteRepository @Inject constructor(
         }
     }
 
+    // Api -> Database --> UI
     suspend fun upsertNotesCached(notes: List<NoteEntity>) {
         notes.forEach { note ->
             upsertNoteCached(note)
         }
     }
 
+    // Database -> Api -> Database --> UI (as Flow of Resource)
     fun getAllNotesCached(): Flow<Resource<List<NoteEntity>>> {
         return networkBoundResource(
             queryDb = {
@@ -117,6 +104,43 @@ class NoteRepository @Inject constructor(
         )
     }
 
+
+
+    /// REMOTE = to/from API Only ///
+
+    suspend fun registerApi(email: String, password: String): Resource<SimpleResponse> =
+        callApi {
+            notesApi.register(AccountRequest(email, password))
+        }
+
+    suspend fun loginApi(email: String, password: String): Resource<SimpleResponse> =
+        callApi {
+            notesApi.login(AccountRequest(email, password))
+        }
+
+    // Gets all notes for the authenticated user
+    suspend fun getAllNotesApi() =
+        callApi {
+            notesApi.getNotes()
+        }
+
+    suspend fun deleteNoteApi(deleteNoteId: String) =
+        callApi {
+            notesApi.deleteNote(DeleteNoteRequest(deleteNoteId))
+        }
+
+    suspend fun getOwnerIdForEmail(email: String?): String? {
+        if(email.isNullOrBlank()) return null
+
+        val response = callApi {
+            notesApi.getOwnerIdForEmail(email)
+        }
+        if(response.status != Status.SUCCESS) return null
+
+        return response.data?.data
+    }
+
+    // Standardized call to the API returns a `Resource.<status>` object
     private suspend fun <T : BaseSimpleResponse> callApi(
         call: suspend () -> Response<out T>
     ): Resource<T> = withContext(Dispatchers.IO) {
@@ -173,10 +197,10 @@ class NoteRepository @Inject constructor(
     }
 
 
-    /// Local Database ///
+    /// LOCAL DATABASE = to/from local database ONLY ///
 
     //suspend fun getNotes() = notesDao.getAllNotes()
-    suspend fun getNote(id: String) = notesDao.getNoteById(id)
+    suspend fun getNoteByIdDb(noteId: String) = notesDao.getNoteById(noteId)
 
 
     /// Tests ///

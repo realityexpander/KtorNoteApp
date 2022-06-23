@@ -107,18 +107,24 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
                     Status.SUCCESS -> {
                         binding.registerProgressBar.visibility = View.GONE
                         binding.loginProgressBar.visibility = View.GONE
-                        showSnackbar(resource.data ?: resource.message ?: "Auth Status Success: No message sent from server")
+                        showSnackbar(resource.data ?: resource.message
+                            ?: "Successful Auth Status, but no message sent from server"
+                        )
 
-                        if(saveAllCredentials(sharedPref,
-                            basicAuthInterceptor,
-                            curEmail,
-                            curPassword)
+                        // Get the userId of the logged in user
+                        val curUserId = viewModel.getOwnerIdForEmail(curEmail)
+
+                        if(saveAuthCredentialsToPrefs(sharedPref,
+                                basicAuthInterceptor,
+                                curEmail,
+                                curPassword,
+                                curUserId)
                         ) {
                             // showSnackbar("Credentials saved to shared prefs")
                             navigateToNoteList()
+                        } else {
+                            viewModel.showSavingCredentialsFailed()
                         }
-
-                        viewModel.savingCredentialsFailed()
                     }
                     Status.ERROR -> {
                         binding.registerProgressBar.visibility = View.GONE

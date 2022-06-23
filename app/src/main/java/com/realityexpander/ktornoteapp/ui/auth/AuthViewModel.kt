@@ -9,6 +9,7 @@ import com.realityexpander.ktornoteapp.common.Status
 import com.realityexpander.ktornoteapp.repositories.NoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,7 +38,7 @@ class AuthViewModel @Inject constructor(
 
         _authenticationStatus.postValue( Resource.loading("Registering user...") )
         viewModelScope.launch {
-            val result = repository.register(email, password)
+            val result = repository.registerApi(email, password)
 
             _authenticationStatus.postValue(
                 Resource(
@@ -61,7 +62,7 @@ class AuthViewModel @Inject constructor(
 
         _authenticationStatus.postValue( Resource.loading(message = "Logging in user...") )
         viewModelScope.launch {
-            val result = repository.login(email, password)
+            val result = repository.loginApi(email, password)
 
             _authenticationStatus.postValue(
                 Resource(
@@ -73,9 +74,34 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun showSavingCredentialsFailed() {
+        _authenticationStatus.postValue(Resource.error(
+            "Saving Credentials failed, please try again."
+        ))
+    }
+
+    fun getOwnerIdForEmail(authEmail: String?): String? {
+        return runBlocking {
+            repository.getOwnerIdForEmail(authEmail)
+        }
+    }
+
+
+
+
+
+
+
+    /////// TESTS ///////
+
+    fun testCrossinline() {
+        val result = repository.testNetworkBoundResource()
+        repository.runTestNetworkBoundResource()
+    }
+
     fun getNotesFromApi() {
         viewModelScope.launch {
-            val result = repository.getNotesFromApi()
+            val result = repository.getAllNotesApi()
 
             when(result.status) {
                 Status.SUCCESS -> {
@@ -90,17 +116,6 @@ class AuthViewModel @Inject constructor(
             }
 
         }
-    }
-
-    fun savingCredentialsFailed() {
-        _authenticationStatus.postValue(Resource.error(
-            "Saving Credentials failed"
-        ))
-    }
-
-    fun testCrossinline() {
-        val result = repository.testNetworkBoundResource()
-        repository.runTestNetworkBoundResource()
     }
 
 }

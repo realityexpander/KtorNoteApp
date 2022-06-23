@@ -10,6 +10,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface NotesApi {
 
@@ -40,4 +41,10 @@ interface NotesApi {
 
     @GET("/getNotes")
     suspend fun getNotes(): Response<SimpleResponseWithData<List<NoteEntity>>>
+
+    @GET("/getOwnerIdForEmail")
+    suspend fun getOwnerIdForEmail(
+        @Query("email") email: String,  // @Query means the email is in the URL params
+    ): Response<SimpleResponseWithData<String>>
+
 }

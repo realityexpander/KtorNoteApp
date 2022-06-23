@@ -10,12 +10,13 @@ import java.util.*
 
 @Entity(tableName = "notes") // for Room
 data class NoteEntity(
-    @PrimaryKey(autoGenerate = false)  // dont let Room generate id
+    @PrimaryKey(autoGenerate = false)  // don't let Room generate id
     var id: String = UUID.randomUUID().toString(),  // id generated here
 
     val title: String,
     val content: String,
     val date: String, //Long,
+    // val dateLong: Long,  // TODO add this
     val owners : List<String>,  // must use @TypeConverter to convert the list to a json string
     val color: String,
 
@@ -25,8 +26,8 @@ data class NoteEntity(
 
 typealias NoteEntityList = List<NoteEntity>
 
-fun longToDate(long: Long): String {
+fun millisToDate(longMillis: Long): String {
     val dateFormat = SimpleDateFormat("MM/dd/yyyy, HH:mm", Locale.getDefault())
 
-    return dateFormat.format(long)
+    return dateFormat.format(longMillis)
 }

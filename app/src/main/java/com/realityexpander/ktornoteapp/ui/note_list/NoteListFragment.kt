@@ -4,12 +4,13 @@ import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.*
-import android.widget.LinearLayout
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.realityexpander.ktornoteapp.R
+import com.realityexpander.ktornoteapp.common.Constants
 import com.realityexpander.ktornoteapp.common.Status
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.data.remote.BasicAuthInterceptor
@@ -18,6 +19,7 @@ import com.realityexpander.ktornoteapp.ui.BaseFragment
 import com.realityexpander.ktornoteapp.ui.adapters.NoteListAdapter
 import com.realityexpander.ktornoteapp.ui.common.removeAllCredentials
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -74,6 +76,17 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         binding.fabAddNote.setOnClickListener {
             findNavController().navigate(NoteListFragmentDirections.actionNotesListFragmentToAddEditNoteFragment(""))
         }
+
+
+//        ///// TEST /////
+//        val authEmail = sharedPref.getString(
+//            Constants.ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_EMAIL, null
+//        )
+//        lifecycleScope.launchWhenStarted {
+//            val authUserId = viewModel.getOwnerIdForEmail(authEmail) ?: "unknown user id"
+//            showSnackbar("User ID: $authUserId")
+//        }
+
     }
 
     private fun subscribeToObservers() {
@@ -88,13 +101,15 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
 
                         // Should use a special XML item for this (TODO)
                         if (result.data.isNullOrEmpty()) {
+
+                            // Show "empty list" note item
                             noteListAdapter.notes = listOf(
                                 NoteEntity(
                                     id = "",
                                     title = "No notes found",
-                                    content = "Add a note to get started",
-                                    date = "01/01/2022, 12:00",
-                                    color = "FFFFFF",
+                                    content = "",
+                                    date = "Add a note to get started",
+                                    color = "#FFFFFF",
                                     owners = listOf("")
                                 )
                             )

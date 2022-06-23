@@ -1,7 +1,9 @@
 package com.realityexpander.ktornoteapp.ui.adapters
 
+import android.content.res.Resources
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -11,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.realityexpander.ktornoteapp.R
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.databinding.ItemNoteBinding
+import com.realityexpander.ktornoteapp.ui.common.setDrawableColorTint
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -68,13 +71,11 @@ class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
 
             bind.tvDate.text = note.date
 
-            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.circle_shape, null)
-            drawable?.let {
-                val wrappedDrawable = DrawableCompat.wrap(it)
-                val color = Color.parseColor("${note.color}")
-                DrawableCompat.setTint(wrappedDrawable, color)
-                bind.viewNoteColor.background = it // wrappedDrawable
-            }
+            setDrawableColorTint(bind.viewNoteColor,
+                R.drawable.circle_shape,
+                note.color,
+                resources
+            )
 
             // Set the onClick function for this RecyclerView item
             setOnItemClickListener {
@@ -98,6 +99,7 @@ class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
         this.onItemClickListener = clickListener
     }
 }
+
 
 
 
