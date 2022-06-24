@@ -5,9 +5,9 @@
     app:startDestination="@id/authFragment">
 
     <fragment
-        android:id="@+id/addEditNoteFragment"
+        android:id="@+id/noteAddEditFragment"
         android:name="com.realityexpander.ktornoteapp.ui.note_add_edit.NoteAddEditFragment"
-        android:label="AddEditNoteFragment" >
+        android:label="NoteAddEditFragment">
         <argument
             android:name="noteId"
             app:argType="string" />
@@ -26,7 +26,9 @@
         android:label="NoteDetailFragment" >
         <action
             android:id="@+id/action_noteDetailFragment_to_addEditNoteFragment"
-            app:destination="@id/addEditNoteFragment" />
+            app:destination="@id/noteAddEditFragment"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_left" />
         <argument
             android:name="noteId"
             app:argType="string" />
@@ -34,13 +36,15 @@
     <fragment
         android:id="@+id/noteListFragment"
         android:name="com.realityexpander.ktornoteapp.ui.note_list.NoteListFragment"
-        android:label="NotesListFragment" >
+        android:label="NoteListFragment">
         <action
             android:id="@+id/action_notesListFragment_to_addEditNoteFragment"
-            app:destination="@id/addEditNoteFragment" />
+            app:destination="@id/noteAddEditFragment" />
         <action
             android:id="@+id/action_notesListFragment_to_noteDetailFragment"
-            app:destination="@id/noteDetailFragment" />
+            app:destination="@id/noteDetailFragment"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_left" />
         <action
             android:id="@+id/action_notesListFragment_to_authFragment"
             app:destination="@id/authFragment" />

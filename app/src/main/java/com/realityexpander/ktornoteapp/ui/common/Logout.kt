@@ -47,7 +47,7 @@ fun BaseFragment.logoutFromFragment(
                         "\n\nAre you sure you want to logout?"
             )
             .setPositiveButton("Yes") { _, _ ->
-                // Try logout again, but this time with destructive=true
+                // Try logout again, but this time with `destructive=true`
                 logoutFromFragment(
                     isLogoutDestructive = true,  // logout destructively
                     isViewModelLogoutSuccessful,

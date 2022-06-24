@@ -114,6 +114,7 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
                                 curNoteColor = note.color
                                 binding.etNoteTitle.setText(note.title)
                                 binding.etNoteContent.setText(note.content)
+                                binding.viewNoteColor.visibility = View.VISIBLE
                                 setDrawableColorTint(binding.viewNoteColor,
                                     R.drawable.circle_shape,
                                     note.color,

@@ -13,6 +13,7 @@
             android:id="@+id/viewNoteColor"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:visibility="invisible"
             android:background="@drawable/circle_shape"
             app:layout_constraintBottom_toBottomOf="@id/etNoteTitle"
             app:layout_constraintEnd_toEndOf="parent"
