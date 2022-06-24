@@ -210,90 +210,7 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         ) {
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
 
-            var startX = 0f
-            var endX = 0f
-            var textAlignment = Paint.Align.LEFT
-            var textEndXAdjustment = 0f
-            val textFontSize = 60f
-            val numTextLines = 3
-            val lineSpacing = 65f
-            val textPadding = 30f
-
-            if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                if (dX > 0) {
-                    // Swiping to the right
-                    startX = viewHolder.itemView.left.toFloat()
-                    endX = viewHolder.itemView.left.toFloat() + dX
-                    textAlignment = Paint.Align.RIGHT
-                    textEndXAdjustment = -40f - (textPadding/2)
-                } else {
-                    // Swiping to the left
-                    startX = viewHolder.itemView.right.toFloat()
-                    endX = viewHolder.itemView.right.toFloat() + dX
-                    textAlignment = Paint.Align.LEFT
-                }
-            }
-
-            fun drawTextLine( text: String, c: Canvas, x: Float, y: Float) {
-                c.drawText(text, x, y,
-                    Paint().apply {
-                        color = Color.WHITE
-                        strokeWidth = 2f
-                        fontMetricsInt.let {
-                            textSize = textFontSize
-                            isFakeBoldText = true
-                            textAlign = textAlignment
-                        }
-                    })
-            }
-
-            // save canvas state
-            c.save()
-
-            // Fill for help indicator background
-            c.drawRect(
-                startX, //viewHolder.itemView.left.toFloat(),
-                viewHolder.itemView.top.toFloat(),
-                endX, //viewHolder.itemView.left.toFloat() + dX,
-                viewHolder.itemView.bottom.toFloat(),
-                Paint().apply {
-                    color = Color.RED
-                    style = Paint.Style.FILL
-                }
-            )
-
-            // Draw help indicator text
-            var y = (
-                (viewHolder.itemView.bottom.toFloat() - viewHolder.itemView.top.toFloat()) / 2f
-            ) - lineSpacing + (textFontSize/(numTextLines+1))
-            drawTextLine("swipe", c,
-                endX + textPadding + textEndXAdjustment, //viewHolder.itemView.right.toFloat() + dX + 20f,
-                viewHolder.itemView.top.toFloat() + y,
-            )
-            y+=lineSpacing
-            drawTextLine("left/right", c,
-                endX + textPadding + textEndXAdjustment, //viewHolder.itemView.right.toFloat() + dX + 20f,
-                viewHolder.itemView.top.toFloat() + y,
-            )
-            y+=lineSpacing
-            drawTextLine("to delete", c,
-                endX + textPadding + textEndXAdjustment,// viewHolder.itemView.right.toFloat() + dX + 20f,
-                viewHolder.itemView.top.toFloat() + y,
-            )
-
-            c.restore()
-
-//            Line Draw Test
-//            c.drawLine(
-//                viewHolder.itemView.right.toFloat(),
-//                viewHolder.itemView.top.toFloat(),
-//                viewHolder.itemView.right.toFloat() + dX,
-//                viewHolder.itemView.bottom.toFloat(),
-//                Paint().apply {
-//                    color = Color.WHITE
-//                    strokeWidth = 2f
-//                }
-//            )
+            drawLeftRightHelpIndicators(actionState, dX, viewHolder, c)
 
             if(actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
                 isSwipingRecyclerViewItem.postValue(isCurrentlyActive)
@@ -335,6 +252,103 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun drawLeftRightHelpIndicators(
+        actionState: Int,
+        dX: Float,
+        viewHolder: RecyclerView.ViewHolder,
+        c: Canvas
+    ) {
+        var startX = 0f
+        var endX = 0f
+        var textAlignment = Paint.Align.LEFT
+        var textEndXAdjustment = 0f
+        val textFontSize = 60f
+        val numTextLines = 3
+        val lineSpacing = 65f
+        val textPadding = 30f
+
+        if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+            if (dX > 0) {
+                // Swiping to the right
+                startX = viewHolder.itemView.left.toFloat()
+                endX = viewHolder.itemView.left.toFloat() + dX
+                textAlignment = Paint.Align.RIGHT
+                textEndXAdjustment = -40f - (textPadding / 2)
+            } else {
+                // Swiping to the left
+                startX = viewHolder.itemView.right.toFloat()
+                endX = viewHolder.itemView.right.toFloat() + dX
+                textAlignment = Paint.Align.LEFT
+            }
+        }
+
+        fun drawTextLine(text: String, c: Canvas, x: Float, y: Float) {
+            c.drawText(text, x, y,
+                Paint().apply {
+                    color = Color.WHITE
+                    strokeWidth = 2f
+                    fontMetricsInt.let {
+                        textSize = textFontSize
+                        isFakeBoldText = true
+                        textAlign = textAlignment
+                    }
+                })
+        }
+
+        // save canvas state
+        c.save()
+
+        // Fill for help indicator background
+        c.drawRect(
+            startX, //viewHolder.itemView.left.toFloat(),
+            viewHolder.itemView.top.toFloat(),
+            endX, //viewHolder.itemView.left.toFloat() + dX,
+            viewHolder.itemView.bottom.toFloat(),
+            Paint().apply {
+                color = Color.RED
+                style = Paint.Style.FILL
+            }
+        )
+
+        // Draw help indicator text
+
+        // find the vertical center for the text block
+        var y = (
+                (viewHolder.itemView.bottom.toFloat() - viewHolder.itemView.top.toFloat()) / 2f
+                ) - lineSpacing + (textFontSize / (numTextLines + 1))
+        drawTextLine(
+            "swipe", c,
+            endX + textPadding + textEndXAdjustment,
+            viewHolder.itemView.top.toFloat() + y,
+        )
+        y += lineSpacing
+        drawTextLine(
+            "left/right", c,
+            endX + textPadding + textEndXAdjustment,
+            viewHolder.itemView.top.toFloat() + y,
+        )
+        y += lineSpacing
+        drawTextLine(
+            "to delete", c,
+            endX + textPadding + textEndXAdjustment,
+            viewHolder.itemView.top.toFloat() + y,
+        )
+
+        c.restore()
+
+//        Line Draw Test
+//        c.drawLine(
+//            viewHolder.itemView.right.toFloat(),
+//            viewHolder.itemView.top.toFloat(),
+//            viewHolder.itemView.right.toFloat() + dX,
+//            viewHolder.itemView.bottom.toFloat(),
+//            Paint().apply {
+//                color = Color.WHITE
+//                strokeWidth = 2f
+//            }
+//        )
     }
 
 }
