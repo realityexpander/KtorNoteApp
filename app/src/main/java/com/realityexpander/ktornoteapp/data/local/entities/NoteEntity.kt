@@ -31,7 +31,7 @@ typealias NoteEntities = List<NoteEntity>
 
 // Standard date format for Notes
 fun millisToDateString(longMillis: Long): String {
-    val dateFormat = SimpleDateFormat("MM/dd/yyyy, HH:mm a", Locale.getDefault())
+    val dateFormat = SimpleDateFormat("MM/dd/yyyy, hh:mm a", Locale.getDefault())
 
     return dateFormat.format(longMillis)
 }
