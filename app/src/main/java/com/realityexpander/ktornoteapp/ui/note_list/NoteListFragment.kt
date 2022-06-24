@@ -214,7 +214,7 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
             var endX = 0f
             var textAlignment = Paint.Align.LEFT
             var textEndXAdjustment = 0f
-            val textFontSize = 70f
+            val textFontSize = 60f
             val numTextLines = 3
             val lineSpacing = 65f
             val textPadding = 30f
