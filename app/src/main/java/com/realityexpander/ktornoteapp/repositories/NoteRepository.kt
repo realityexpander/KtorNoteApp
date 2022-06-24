@@ -14,6 +14,7 @@ import com.realityexpander.ktornoteapp.data.remote.requests.AccountRequest
 import com.realityexpander.ktornoteapp.data.remote.requests.DeleteNoteIdRequest
 import com.realityexpander.ktornoteapp.data.remote.responses.BaseSimpleResponse
 import com.realityexpander.ktornoteapp.data.remote.responses.SimpleResponse
+import com.realityexpander.ktornoteapp.data.remote.responses.SimpleResponseWithData
 import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.HttpStatusCode.Companion.fromValue
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +32,8 @@ class NoteRepository @Inject constructor(
     private val notesApi: NotesApi,
     private val gson: Gson
 ) {
+
+    private var curNotesResponse: Response<SimpleResponseWithData<List<NoteEntity>>>? = null
 
     ////////////////////////////////////////////////////
     /// CACHED = uses Api and local database
@@ -56,13 +59,13 @@ class NoteRepository @Inject constructor(
                 val noteId = body.data?.id
 
                 if (noteId != null) {
-                    notesDao.upsertNote(note.apply { isSynced = true; id = noteId })
+                    upsertNoteDb(note.apply { isSynced = true; id = noteId })
                 }
             }
         } else {
             // If the server failed to add the note, then attempt to update the local database
             // and set the note as not synced.
-            notesDao.upsertNote(note.apply { isSynced = false })
+            upsertNoteDb(note.apply { isSynced = false })
         }
     }
 
@@ -79,22 +82,25 @@ class NoteRepository @Inject constructor(
     fun getAllNotesCached(): Flow<Resource<List<NoteEntity>>> {
         return networkBoundResource(
             queryDb = {
-                notesDao.getAllNotes()
+                getAllNotesDb()
             },
             fetchFromNetwork = {
-                notesApi.getNotes()
+                syncAllNotesCached()
+                curNotesResponse
             },
-            saveFetchResponseToDb = { response ->
-                if(response.isSuccessful && response.body() != null) {
-                    upsertNotesCached(response.body()!!.data ?: emptyList())
+            saveFetchedResponseToDb = { response ->
+                if(response?.isSuccessful == true && response.body() != null) {
+                    val freshNotes = response.body()?.data ?: emptyList()
+
+                    upsertNotesDb(freshNotes.onEach{ it.isSynced = true })
 
                     return@networkBoundResource
                 }
 
                 throw Exception("Error getting notes from API, " +
-                        "response: code=" + response.code() + ", "
-                        + response.message() + ", "
-                        + response.errorBody()?.string()
+                        "response: code=" + response?.code() + ", "
+                        + response?.message() + ", "
+                        + response?.errorBody()?.string()
                 )
             },
             shouldFetch = { _->
@@ -126,14 +132,61 @@ class NoteRepository @Inject constructor(
         // Check if the server returned a successful response
         if (response != null && response.isSuccessful) {
             // if the server succeeded, delete the deleteNoteId from
-            // the table of list of locally_deleted_noteIds (if it exists)
+            // the table list of locally_deleted_noteIds (if it exists)
             deleteLocallyDeletedNoteIdDb(deleteNoteId)
         } else {
             // if the server failed, insert the deleteNoteId into
-            // the table of list of locally_deleted_noteIds
+            // the table list of locally_deleted_noteIds
             insertLocallyDeletedNoteIdDb(deleteNoteId)
         }
 
+    }
+
+    // Sync all notes for the authenticated user
+    // Api -> Database --> UI
+    // Delete notes on the server that are not in the local database
+    //   via the list of locally_deleted_noteIds.
+    suspend fun syncAllNotesCached() {
+
+        // Check if there are any locally deleted notes (deleted while offline)
+        val locallyDeletedNoteIds = getAllLocallyDeletedNoteIdsDb()
+        if (locallyDeletedNoteIds.isNotEmpty()) {
+            // Attempt to Delete (on the server) the locally_deleted notes
+            locallyDeletedNoteIds.forEach { locallyDeletedNoteId ->
+                deleteNoteIdCached(locallyDeletedNoteId)
+            }
+        }
+
+        // Check if there are any unsynced notes (added/edited while offline)
+        val unsyncedNotes = getAllUnsyncedNotesDb()
+        if(unsyncedNotes.isNotEmpty()) {
+            // Attempt to add (on the server) the unsynced notes
+            unsyncedNotes.forEach { unsyncedNote ->
+                upsertNoteCached(unsyncedNote)
+            }
+        }
+
+        // Get all current notes from the server for this user
+        curNotesResponse = try {
+            getAllNotesApi()
+        } catch (e: Exception) {
+            null
+        }
+
+        if (curNotesResponse != null && curNotesResponse!!.isSuccessful) {
+            val body = curNotesResponse!!.body()
+            if (body != null) {
+
+                val freshNotes = body.data ?: emptyList()
+
+                // Delete all notes from local database (to start fresh)
+                deleteAllNotesDb()
+
+                // Insert all notes from the server into local database
+                // and indicate they are successfully synced (isSynced = true)
+                upsertNotesDb(freshNotes.onEach { it.isSynced = true })
+            }
+        }
     }
 
 
@@ -150,11 +203,15 @@ class NoteRepository @Inject constructor(
             notesApi.login(AccountRequest(email, password))
         }
 
-    // Gets all notes for the authenticated user
-    suspend fun getAllNotesApi() =
+    // Gets all notes for the authenticated user, wrapped in a Resource
+    suspend fun getAllNotesResourceApi() =
         callApi {
             notesApi.getNotes()
         }
+
+    // Gets all notes for the authenticated user
+    suspend fun getAllNotesApi() =
+            notesApi.getNotes()
 
     suspend fun deleteNoteApi(deleteNoteId: String) =
         callApi {
@@ -238,14 +295,25 @@ class NoteRepository @Inject constructor(
     // Delete all notes
     suspend fun deleteAllNotesDb() = notesDao.deleteAllNotes()
 
+    // Get all notes
+    fun getAllNotesDb() = notesDao.getAllNotes()
+
     // Get all unsynced notes
-    suspend fun getUnsyncedNotesDb() = notesDao.getAllUnsyncedNotes()
+    suspend fun getAllUnsyncedNotesDb() = notesDao.getAllUnsyncedNotes()
+
+    suspend fun upsertNoteDb(note: NoteEntity) = notesDao.upsertNote(note)
+
+    suspend fun upsertNotesDb(notes: List<NoteEntity>) {
+        notes.forEach { note ->
+            upsertNoteDb(note)
+        }
+    }
 
 
     /// LOCALLY_DELETED_NOTE_ID = uses local database only ///
 
     // Get all locally_deleted noteIds
-    private suspend fun getAllLocallyDeletedNoteIds() =
+    private suspend fun getAllLocallyDeletedNoteIdsDb() =
         notesDao.getAllLocallyDeletedNoteIds()
 
     // Delete a locally_deleted noteId
@@ -261,7 +329,9 @@ class NoteRepository @Inject constructor(
 
 
 
-    /// Tests ///
+
+    ////////////////////////////////////////////////////
+    /// Testing only
 
     fun testNetworkBoundResource(): Flow<Resource<Pair<String, String>>> {  // always returns a Flow of Resource of a type
         // <currentValue, previousValue>
@@ -284,7 +354,7 @@ class NoteRepository @Inject constructor(
             debugDatabaseResultType = { result ->
                 println("debugDbResultType: '$result'")
             },
-            saveFetchResponseToDb = { response ->
+            saveFetchedResponseToDb = { response ->
                 println("Saving to DB: '$response'")
 
                 dbEntity = Pair(response, dbEntity.first)
@@ -300,4 +370,5 @@ class NoteRepository @Inject constructor(
             }
         }
     }
+
 }

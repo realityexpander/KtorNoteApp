@@ -63,31 +63,14 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
 
         setupRecyclerView()
+        setupNoteListAdapter()
+
         subscribeToObservers()
-
-        // Set the item click listener for the Notes List items
-        noteListAdapter.setOnItemClickListener { note ->
-            if (note.id.isNotBlank()) {
-                findNavController()
-                    .navigate(NoteListFragmentDirections
-                        .actionNotesListFragmentToNoteDetailFragment(note.id)
-                    )
-
-                return@setOnItemClickListener
-            }
-
-            showSnackbar("Note ID is empty")
-        }
-
-        binding.fabAddNote.setOnClickListener {
-            findNavController()
-                .navigate(NoteListFragmentDirections
-                    .actionNotesListFragmentToAddEditNoteFragment("")
-                )
-        }
+        setupSwipeToRefreshLayout()
+        setupFAB()
 
 
-//        ///// TEST /////
+//        ///// TESTING /////
 //        val authEmail = sharedPref.getString(
 //            Constants.ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_EMAIL, null
 //        )
@@ -98,7 +81,43 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
 
     }
 
+    // Set the item click listener for the Notes List items
+    private fun setupNoteListAdapter() {
+        noteListAdapter.setOnItemClickListener { note ->
+            if (note.id.isNotBlank()) {
+                findNavController()
+                    .navigate(
+                        NoteListFragmentDirections
+                            .actionNotesListFragmentToNoteDetailFragment(note.id)
+                    )
+
+                return@setOnItemClickListener
+            }
+
+            showSnackbar("Note ID is empty")
+        }
+    }
+
+    private fun setupFAB() {
+        binding.fabAddNote.setOnClickListener {
+            findNavController()
+                .navigate(
+                    NoteListFragmentDirections
+                        .actionNotesListFragmentToAddEditNoteFragment("")
+                )
+        }
+    }
+
+    // respond to swipe to refresh
+    private fun setupSwipeToRefreshLayout() {
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            viewModel.syncAllNotes()
+        }
+    }
+
     private fun subscribeToObservers() {
+
+        // Observe and respond to Events from the ViewModel
         viewModel.allNotes.observe(viewLifecycleOwner) { eventNullable ->
 
             eventNullable?.let { event ->
@@ -210,7 +229,7 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         ) {
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
 
-            drawLeftRightHelpIndicators(actionState, dX, viewHolder, c)
+            drawLeftRightHelpIndicators(c, viewHolder, dX, actionState)
 
             if(actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
                 isSwipingRecyclerViewItem.postValue(isCurrentlyActive)
@@ -255,10 +274,10 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
     }
 
     private fun drawLeftRightHelpIndicators(
-        actionState: Int,
-        dX: Float,
+        c: Canvas,
         viewHolder: RecyclerView.ViewHolder,
-        c: Canvas
+        dX: Float,
+        actionState: Int
     ) {
         var startX = 0f
         var endX = 0f

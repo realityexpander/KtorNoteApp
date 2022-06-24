@@ -101,7 +101,7 @@ class AuthViewModel @Inject constructor(
 
     fun getNotesFromApi() {
         viewModelScope.launch {
-            val result = repository.getAllNotesApi()
+            val result = repository.getAllNotesResourceApi()
 
             when(result.status) {
                 Status.SUCCESS -> {

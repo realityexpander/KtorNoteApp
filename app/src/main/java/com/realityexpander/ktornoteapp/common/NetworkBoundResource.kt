@@ -8,13 +8,14 @@ import kotlinx.coroutines.flow.*
 inline fun <DatabaseResultType, NetworkResponseType> networkBoundResource(
     crossinline queryDb: () -> Flow<DatabaseResultType>,
     crossinline fetchFromNetwork: suspend () -> NetworkResponseType,
-    crossinline saveFetchResponseToDb: suspend (NetworkResponseType) -> Unit,
+    crossinline saveFetchedResponseToDb: suspend (NetworkResponseType) -> Unit,
     crossinline onFetchFailed: (Throwable) -> Unit = { Unit },
     crossinline shouldFetch: (DatabaseResultType) -> Boolean = { true },
     crossinline debugNetworkResponseType: (NetworkResponseType) -> Unit = { Unit },
     crossinline debugDatabaseResultType: (DatabaseResultType) -> Unit = { Unit },
 ) = flow {
 
+    // Helpful to show the extracted types for the inline function
     debugNetworkResponseType(fetchFromNetwork())
     debugDatabaseResultType(queryDb().first())
 
@@ -37,7 +38,7 @@ inline fun <DatabaseResultType, NetworkResponseType> networkBoundResource(
                 val response = fetchFromNetwork()
 
                 // save the fresh data to the database
-                saveFetchResponseToDb(response)
+                saveFetchedResponseToDb(response)
 
                 // run the db query to emit the fresh data
                 queryDb().map { dbResult ->

@@ -18,7 +18,7 @@ fun logoutFromViewModel(
         // Only clear the DB if there are no unsynced notes, or
         // the user wants to logout destructively.
         if (isLogoutDestructive ||
-            repository.getUnsyncedNotesDb().isEmpty()
+            repository.getAllUnsyncedNotesDb().isEmpty()
         ) {
             repository.deleteAllNotesDb()
 

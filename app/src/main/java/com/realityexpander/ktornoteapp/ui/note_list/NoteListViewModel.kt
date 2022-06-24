@@ -17,13 +17,13 @@ class NoteListViewModel @Inject constructor(
 
     private val _forceUpdate = MutableLiveData<Boolean>(false)
     
-    private val _allNotes = _forceUpdate.switchMap {
-        repository.getAllNotesCached()
-            .asLiveData(viewModelScope.coroutineContext)
-    }.switchMap { notes ->
-        MutableLiveData(Event(notes))
-    }
-    
+    private val _allNotes =
+        _forceUpdate.switchMap {
+            repository.getAllNotesCached()
+                .asLiveData(viewModelScope.coroutineContext)
+        }.switchMap { notes ->
+            MutableLiveData(Event(notes))
+        }
     val allNotes:LiveData<Event<Resource<List<NoteEntity>>>> = _allNotes
 
 

@@ -78,8 +78,6 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
                 curEmail ?: "",
                 curPassword ?: ""
             )
-
-            //findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToNotesListFragment())
         }
 
         binding.etRegisterPasswordConfirm.onImeDone {
@@ -95,7 +93,6 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
                 curPassword ?: "",
                 binding.etRegisterPasswordConfirm.text.toString(),
             )
-            // findNavController().navigate(AuthFragmentDirections.actionAuthFragmentToRegisterFragment())
         }
 
     }

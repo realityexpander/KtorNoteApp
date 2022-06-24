@@ -2,10 +2,11 @@ package com.realityexpander.ktornoteapp.ui.note_add_edit
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
+import android.view.*
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.realityexpander.ktornoteapp.R
 import com.realityexpander.ktornoteapp.common.Constants.DEFAULT_NOTE_COLOR
@@ -18,8 +19,10 @@ import com.realityexpander.ktornoteapp.ui.BaseFragment
 import com.realityexpander.ktornoteapp.ui.common.setDrawableColorTint
 import com.realityexpander.ktornoteapp.ui.dialogs.ColorPickerDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
+import java.lang.reflect.Method
 import java.util.*
 import javax.inject.Inject
+
 
 const val FRAGMENT_TAG = "NoteAddEditFragment"
 
@@ -49,9 +52,12 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
         savedInstanceState: Bundle?
     ): View {
 
+        setHasOptionsMenu(true) // show menu in toolbar
+
+        // Was id passed for the Note we are editing?
         if (args.noteId.isNotEmpty()) {
             viewModel.getNoteById(args.noteId)
-            subscribeToObservers()
+            subscribeToObservers()  // listen for the database result
         }
 
         _binding = FragmentNoteAddEditBinding.inflate(inflater, container, false)
@@ -82,6 +88,9 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
             }.show(parentFragmentManager, FRAGMENT_TAG) // FRAGMENT_TAG is to identify the dialog fragment upon config changes
         }
 
+        // If Creating a new Note, setup default color picker
+        if (args.noteId.isEmpty()) showColorPickerSwatch()
+
         // TODO Add save button to toolbar
 //        binding.saveButton.setOnClickListener {
 //            saveNote()
@@ -99,6 +108,7 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
 
     override fun onPause() {
         super.onPause()
+
         saveNote()
     }
 
@@ -114,12 +124,7 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
                                 curNoteColor = note.color
                                 binding.etNoteTitle.setText(note.title)
                                 binding.etNoteContent.setText(note.content)
-                                binding.viewNoteColor.visibility = View.VISIBLE
-                                setDrawableColorTint(binding.viewNoteColor,
-                                    R.drawable.circle_shape,
-                                    note.color,
-                                    resources
-                                )
+                                showColorPickerSwatch()
 
                                 return@outer
                             }
@@ -138,17 +143,27 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
         }
     }
 
+    private fun showColorPickerSwatch() {
+        binding.viewNoteColor.visibility = View.VISIBLE
+        setDrawableColorTint(
+            binding.viewNoteColor,
+            R.drawable.circle_shape,
+            curNoteColor,
+            resources
+        )
+    }
 
-    private fun saveNote() {
+
+    private fun saveNote(): Boolean {
         val authUserId = sharedPref.getString(
             ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_USER_ID, "Unknown user"
         ) ?: "Unknown user"
 
         val title = binding.etNoteTitle.text.toString()
         val content = binding.etNoteContent.text.toString()
-        if(title.isEmpty() || content.isEmpty()) {
-            showSnackbar("Please enter a title and color")
-            return
+        if(title.isEmpty()) {
+            showSnackbar("Please enter a title")
+            return false
         }
 
         // Update the date to the current time
@@ -166,6 +181,21 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
         )
 
         viewModel.upsertNote(note)
+        return true
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_note_add_edit, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.miSave -> {
+                findNavController().navigateUp()
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
 

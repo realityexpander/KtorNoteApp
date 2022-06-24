@@ -37,7 +37,6 @@ class NoteAddEditViewModel @Inject constructor(
             _note.postValue(Event(Resource.success(data = it)))
         } ?: _note.postValue(Event(Resource.error(data = null, message = "Error")))
 
-
     }
 
 

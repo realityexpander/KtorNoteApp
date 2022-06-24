@@ -14,6 +14,8 @@
         <entry key="app/src/main/res/layout/fragment_note_list.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_notes.xml" value="0.19479166666666667" />
         <entry key="app/src/main/res/layout/item_note.xml" value="0.33" />
+        <entry key="app/src/main/res/menu/menu_note_add_edit.xml" value="0.1675925925925926" />
+        <entry key="app/src/main/res/menu/menu_notes.xml" value="0.1675925925925926" />
       </map>
     </option>
   </component>
