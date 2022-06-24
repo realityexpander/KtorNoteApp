@@ -5,27 +5,30 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.realityexpander.ktornoteapp.data.local.entities.LocallyDeletedNoteId
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NotesDao {
 
+    //// NOTES ////
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertNote(note: NoteEntity)
 
     @Query("DELETE FROM notes WHERE id = :noteId")
-    suspend fun deleteNoteById(noteId: Int)
+    suspend fun deleteNoteId(noteId: String)
 
     @Query("DELETE FROM notes WHERE isSynced = 1") // Delete all synced notes
     suspend fun deleteAllSyncedNotes()
 
     // returning LiveData excludes the need to declare this a suspend func
     @Query("SELECT * FROM notes WHERE id = :noteId")
-    fun observerNoteById(noteId: String): LiveData<NoteEntity>
+    fun observeNoteId(noteId: String): LiveData<NoteEntity>
 
     @Query("SELECT * FROM notes WHERE id = :noteId")
-    suspend fun getNoteById(noteId: String): NoteEntity?
+    suspend fun getNoteId(noteId: String): NoteEntity?
 
     // returning flow excludes the need to declare this a suspend func
     @Query("SELECT * FROM notes ORDER BY date DESC")
@@ -36,5 +39,18 @@ interface NotesDao {
 
     @Query("DELETE FROM notes")
     suspend fun deleteAllNotes()
+
+
+    //// LOCALLY DELETED NOTE IDs ////
+
+    @Query("SELECT * FROM locally_deleted_note_ids")
+    suspend fun getAllLocallyDeletedNoteIds(): List<String>
+
+    @Query("DELETE FROM locally_deleted_note_ids WHERE deletedNoteId = :locallyDeletedNoteId")
+    suspend fun deleteLocallyDeletedNoteId(locallyDeletedNoteId: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    // gets the table to use from the type of the entity (ie: LocallyDeletedNoteId)
+    suspend fun insertLocallyDeletedNoteId(locallyDeletedNoteId: LocallyDeletedNoteId)
 
 }

@@ -3,7 +3,7 @@ package com.realityexpander.ktornoteapp.data.remote
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.data.remote.requests.AccountRequest
 import com.realityexpander.ktornoteapp.data.remote.requests.AddOwnerIdToNoteIdRequest
-import com.realityexpander.ktornoteapp.data.remote.requests.DeleteNoteRequest
+import com.realityexpander.ktornoteapp.data.remote.requests.DeleteNoteIdRequest
 import com.realityexpander.ktornoteapp.data.remote.responses.SimpleResponse
 import com.realityexpander.ktornoteapp.data.remote.responses.SimpleResponseWithData
 import retrofit2.Response
@@ -30,8 +30,8 @@ interface NotesApi {
     ): Response<SimpleResponseWithData<NoteEntity>>
 
     @POST("/deleteNote")
-    suspend fun deleteNote(
-        @Body deleteNote: DeleteNoteRequest,  // @Body means the deleteNote is the body of the request and will be converted to a JSON object string
+    suspend fun deleteNoteId(
+        @Body deleteNote: DeleteNoteIdRequest,  // @Body means the deleteNote is the body of the request and will be converted to a JSON object string
     ): Response<SimpleResponseWithData<NoteEntity>>
 
     @POST("/addOwnerIdToNoteId")

@@ -7,10 +7,11 @@ import com.realityexpander.ktornoteapp.common.Status
 import com.realityexpander.ktornoteapp.common.isInternetConnected
 import com.realityexpander.ktornoteapp.common.networkBoundResource
 import com.realityexpander.ktornoteapp.data.local.NotesDao
+import com.realityexpander.ktornoteapp.data.local.entities.LocallyDeletedNoteId
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.data.remote.NotesApi
 import com.realityexpander.ktornoteapp.data.remote.requests.AccountRequest
-import com.realityexpander.ktornoteapp.data.remote.requests.DeleteNoteRequest
+import com.realityexpander.ktornoteapp.data.remote.requests.DeleteNoteIdRequest
 import com.realityexpander.ktornoteapp.data.remote.responses.BaseSimpleResponse
 import com.realityexpander.ktornoteapp.data.remote.responses.SimpleResponse
 import io.ktor.http.HttpStatusCode.Companion.InternalServerError
@@ -31,10 +32,12 @@ class NoteRepository @Inject constructor(
     private val gson: Gson
 ) {
 
+    ////////////////////////////////////////////////////
     /// CACHED = uses Api and local database
     ///  ≈ Api -> Database --> UI
     ///  ≈ Database -> Api -> Database --> UI (as Flow of Resource)
 
+    // Update or insert a note
     // Api -> Database --> UI
     suspend fun upsertNoteCached(note: NoteEntity) {
 
@@ -63,6 +66,7 @@ class NoteRepository @Inject constructor(
         }
     }
 
+    // Update or insert a List of notes
     // Api -> Database --> UI
     suspend fun upsertNotesCached(notes: List<NoteEntity>) {
         notes.forEach { note ->
@@ -70,6 +74,7 @@ class NoteRepository @Inject constructor(
         }
     }
 
+    // Get all notes for the authenticated user
     // Database -> Api -> Database --> UI (as Flow of Resource)
     fun getAllNotesCached(): Flow<Resource<List<NoteEntity>>> {
         return networkBoundResource(
@@ -104,8 +109,35 @@ class NoteRepository @Inject constructor(
         )
     }
 
+    // Delete a noteId
+    // Api -> Database --> UI
+    suspend fun deleteNoteCached(deleteNoteId: String) {
+
+        // Attempt delete via Api first
+        val response = try {
+            notesApi.deleteNoteId(DeleteNoteIdRequest(deleteNoteId))
+        } catch (e: Exception) {
+            null
+        }
+
+        // Delete locally no matter what the server says
+        notesDao.deleteNoteId(deleteNoteId)
+
+        // Check if the server returned a successful response
+        if (response != null && response.isSuccessful) {
+            // if the server succeeded, delete the deleteNoteId from
+            // the table of list of locally_deleted_noteIds (if it exists)
+            deleteLocallyDeletedNoteId(deleteNoteId)
+        } else {
+            // if the server failed, insert the deleteNoteId into
+            // the table of list of locally_deleted_noteIds
+            insertLocallyDeletedNoteId(deleteNoteId)
+        }
+
+    }
 
 
+    ////////////////////////////////////////////////////
     /// REMOTE = to/from Api Only ///
 
     suspend fun registerApi(email: String, password: String): Resource<SimpleResponse> =
@@ -126,7 +158,7 @@ class NoteRepository @Inject constructor(
 
     suspend fun deleteNoteApi(deleteNoteId: String) =
         callApi {
-            notesApi.deleteNote(DeleteNoteRequest(deleteNoteId))
+            notesApi.deleteNoteId(DeleteNoteIdRequest(deleteNoteId))
         }
 
     suspend fun getOwnerIdForEmail(email: String?): String? {
@@ -197,17 +229,33 @@ class NoteRepository @Inject constructor(
     }
 
 
-
+    ////////////////////////////////////////////////////
     /// LOCAL DATABASE = to/from local database ONLY ///
 
     //suspend fun getNotes() = notesDao.getAllNotes()
-    suspend fun getNoteByIdDb(noteId: String) = notesDao.getNoteById(noteId)
+    suspend fun getNoteByIdDb(noteId: String) = notesDao.getNoteId(noteId)
 
     // Delete all notes
     suspend fun deleteAllNotesDb() = notesDao.deleteAllNotes()
 
     // Get all unsynced notes
     suspend fun getUnsyncedNotesDb() = notesDao.getAllUnsyncedNotes()
+
+
+    /// LOCALLY DELETED = uses local database ///
+
+    // Get all locally deleted noteIds
+    suspend fun getAllLocallyDeletedNoteIds() =
+        notesDao.getAllLocallyDeletedNoteIds()
+
+    // Delete a locally deleted noteId
+    suspend fun deleteLocallyDeletedNoteId(locallyDeleteNoteId: String) =
+        notesDao.deleteLocallyDeletedNoteId(locallyDeleteNoteId)
+
+    // Insert a locally deleted noteId
+    suspend fun insertLocallyDeletedNoteId(locallyDeleteNoteId: String) =
+        notesDao.insertLocallyDeletedNoteId(LocallyDeletedNoteId(locallyDeleteNoteId))
+
 
 
 
