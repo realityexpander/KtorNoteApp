@@ -2,12 +2,17 @@ package com.realityexpander.ktornoteapp.ui.note_list
 
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
+import android.graphics.*
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.realityexpander.ktornoteapp.R
 import com.realityexpander.ktornoteapp.common.Status
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
@@ -31,6 +36,9 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
     lateinit var basicAuthInterceptor: BasicAuthInterceptor
 
     private lateinit var noteListAdapter: NoteListAdapter
+
+    // Helper to prevent conflict on swiping left/right on item and swipe to refresh
+    private val isSwipingRecyclerViewItem = MutableLiveData(false)
 
     private var _binding: FragmentNoteListBinding? = null
     // This property is only valid between onCreateView and
@@ -146,12 +154,152 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
                 }
             }
         }
+
+        // Disable the "swipe to refresh" when swiping left/right on the recycler view item
+        isSwipingRecyclerViewItem.observe(viewLifecycleOwner) { isSwiping ->
+            binding.swipeRefreshLayout.isEnabled = !isSwiping
+        }
     }
 
     private fun setupRecyclerView() = binding.rvNotes.apply {
         noteListAdapter = NoteListAdapter()
         adapter = noteListAdapter
         layoutManager = LinearLayoutManager(requireContext())
+        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(this)
+    }
+
+    private val itemTouchHelperCallback =
+        object : ItemTouchHelper.SimpleCallback(
+        0,
+        ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+    ) {
+        override fun onMove(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder
+        ): Boolean {
+            return true
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            val position = viewHolder.layoutPosition
+            val note = noteListAdapter.notes[position]
+            viewModel.deleteNoteId(note.id)
+
+            // Add snackbar to show undo action
+            Snackbar.make(
+                binding.root,
+                "Note deleted",
+                Snackbar.LENGTH_LONG
+            ).setAction("UNDO") {
+                viewModel.upsertNote(note)
+                viewModel.deleteLocallyDeletedNoteId(note.id) // just in case network call failed
+            }.show()
+        }
+
+        // Check if user is swiping left/right on RecyclerView item.
+        // Also draw the "swipe to delete" areas on left/right of the item.
+        override fun onChildDraw(
+            c: Canvas,
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            dX: Float,
+            dY: Float,
+            actionState: Int,
+            isCurrentlyActive: Boolean
+        ) {
+            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+
+            var startX = 0f
+            var endX = 0f
+            var textAlignment = Paint.Align.LEFT
+            var textEndXAdjustment = 0f
+            val textFontSize = 70f
+            val numTextLines = 3
+            val lineSpacing = 65f
+            val textPadding = 30f
+
+            if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                if (dX > 0) {
+                    // Swiping to the right
+                    startX = viewHolder.itemView.left.toFloat()
+                    endX = viewHolder.itemView.left.toFloat() + dX
+                    textAlignment = Paint.Align.RIGHT
+                    textEndXAdjustment = -40f - (textPadding/2)
+                } else {
+                    // Swiping to the left
+                    startX = viewHolder.itemView.right.toFloat()
+                    endX = viewHolder.itemView.right.toFloat() + dX
+                    textAlignment = Paint.Align.LEFT
+                }
+            }
+
+            fun drawTextLine( text: String, c: Canvas, x: Float, y: Float) {
+                c.drawText(text, x, y,
+                    Paint().apply {
+                        color = Color.WHITE
+                        strokeWidth = 2f
+                        fontMetricsInt.let {
+                            textSize = textFontSize
+                            isFakeBoldText = true
+                            textAlign = textAlignment
+                        }
+                    })
+            }
+
+            // save canvas state
+            c.save()
+
+            // Fill for help indicator background
+            c.drawRect(
+                startX, //viewHolder.itemView.left.toFloat(),
+                viewHolder.itemView.top.toFloat(),
+                endX, //viewHolder.itemView.left.toFloat() + dX,
+                viewHolder.itemView.bottom.toFloat(),
+                Paint().apply {
+                    color = Color.RED
+                    style = Paint.Style.FILL
+                }
+            )
+
+            // Draw help indicator text
+            var y = (
+                (viewHolder.itemView.bottom.toFloat() - viewHolder.itemView.top.toFloat()) / 2f
+            ) - lineSpacing + (textFontSize/(numTextLines+1))
+            drawTextLine("swipe", c,
+                endX + textPadding + textEndXAdjustment, //viewHolder.itemView.right.toFloat() + dX + 20f,
+                viewHolder.itemView.top.toFloat() + y,
+            )
+            y+=lineSpacing
+            drawTextLine("left/right", c,
+                endX + textPadding + textEndXAdjustment, //viewHolder.itemView.right.toFloat() + dX + 20f,
+                viewHolder.itemView.top.toFloat() + y,
+            )
+            y+=lineSpacing
+            drawTextLine("to delete", c,
+                endX + textPadding + textEndXAdjustment,// viewHolder.itemView.right.toFloat() + dX + 20f,
+                viewHolder.itemView.top.toFloat() + y,
+            )
+
+            c.restore()
+
+//            Line Draw Test
+//            c.drawLine(
+//                viewHolder.itemView.right.toFloat(),
+//                viewHolder.itemView.top.toFloat(),
+//                viewHolder.itemView.right.toFloat() + dX,
+//                viewHolder.itemView.bottom.toFloat(),
+//                Paint().apply {
+//                    color = Color.WHITE
+//                    strokeWidth = 2f
+//                }
+//            )
+
+            if(actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                isSwipingRecyclerViewItem.postValue(isCurrentlyActive)
+            }
+
+        }
     }
 
     private fun logout(isLogoutDestructive: Boolean = false) {

@@ -11,7 +11,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,7 +32,7 @@ class NoteAddEditViewModel @Inject constructor(
     fun getNoteById(id: String) = viewModelScope.launch {
         _note.postValue(Event(Resource.loading(data = null)))
 
-        val note = repository.getNoteByIdDb(id)
+        val note = repository.getNoteIdDb(id)
         note?.let {
             _note.postValue(Event(Resource.success(data = it)))
         } ?: _note.postValue(Event(Resource.error(data = null, message = "Error")))

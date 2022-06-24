@@ -7,6 +7,7 @@ import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.repositories.NoteRepository
 import com.realityexpander.ktornoteapp.ui.common.logoutFromViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,6 +31,23 @@ class NoteListViewModel @Inject constructor(
         return logoutFromViewModel(isLogoutDestructive, repository)
     }
 
+    fun syncAllNotes() =
+        _forceUpdate.postValue(true)
+
+    fun deleteNoteId(noteId: String) =
+        viewModelScope.launch {
+            repository.deleteNoteIdCached(noteId)
+        }
+
+    fun upsertNote(note: NoteEntity) =
+        viewModelScope.launch {
+            repository.upsertNoteCached(note)
+        }
+
+    fun deleteLocallyDeletedNoteId(noteId: String) =
+        viewModelScope.launch {
+            repository.deleteLocallyDeletedNoteIdDb(noteId)
+        }
 
     ////// TESTING ///////
 //    fun getOwnerIdForEmail(authEmail: String?): String? {

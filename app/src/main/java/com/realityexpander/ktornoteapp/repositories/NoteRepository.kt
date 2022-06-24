@@ -111,7 +111,7 @@ class NoteRepository @Inject constructor(
 
     // Delete a noteId
     // Api -> Database --> UI
-    suspend fun deleteNoteCached(deleteNoteId: String) {
+    suspend fun deleteNoteIdCached(deleteNoteId: String) {
 
         // Attempt delete via Api first
         val response = try {
@@ -127,18 +127,18 @@ class NoteRepository @Inject constructor(
         if (response != null && response.isSuccessful) {
             // if the server succeeded, delete the deleteNoteId from
             // the table of list of locally_deleted_noteIds (if it exists)
-            deleteLocallyDeletedNoteId(deleteNoteId)
+            deleteLocallyDeletedNoteIdDb(deleteNoteId)
         } else {
             // if the server failed, insert the deleteNoteId into
             // the table of list of locally_deleted_noteIds
-            insertLocallyDeletedNoteId(deleteNoteId)
+            insertLocallyDeletedNoteIdDb(deleteNoteId)
         }
 
     }
 
 
     ////////////////////////////////////////////////////
-    /// REMOTE = to/from Api Only ///
+    /// REMOTE = to/from Api Only
 
     suspend fun registerApi(email: String, password: String): Resource<SimpleResponse> =
         callApi {
@@ -161,7 +161,7 @@ class NoteRepository @Inject constructor(
             notesApi.deleteNoteId(DeleteNoteIdRequest(deleteNoteId))
         }
 
-    suspend fun getOwnerIdForEmail(email: String?): String? {
+    suspend fun getOwnerIdForEmailApi(email: String?): String? {
         if(email.isNullOrBlank()) return null
 
         val response = callApi {
@@ -230,10 +230,10 @@ class NoteRepository @Inject constructor(
 
 
     ////////////////////////////////////////////////////
-    /// LOCAL DATABASE = to/from local database ONLY ///
+    /// LOCAL DATABASE = to/from local database ONLY
 
     //suspend fun getNotes() = notesDao.getAllNotes()
-    suspend fun getNoteByIdDb(noteId: String) = notesDao.getNoteId(noteId)
+    suspend fun getNoteIdDb(noteId: String) = notesDao.getNoteId(noteId)
 
     // Delete all notes
     suspend fun deleteAllNotesDb() = notesDao.deleteAllNotes()
@@ -242,18 +242,18 @@ class NoteRepository @Inject constructor(
     suspend fun getUnsyncedNotesDb() = notesDao.getAllUnsyncedNotes()
 
 
-    /// LOCALLY DELETED = uses local database ///
+    /// LOCALLY_DELETED_NOTE_ID = uses local database only ///
 
-    // Get all locally deleted noteIds
-    suspend fun getAllLocallyDeletedNoteIds() =
+    // Get all locally_deleted noteIds
+    private suspend fun getAllLocallyDeletedNoteIds() =
         notesDao.getAllLocallyDeletedNoteIds()
 
-    // Delete a locally deleted noteId
-    suspend fun deleteLocallyDeletedNoteId(locallyDeleteNoteId: String) =
+    // Delete a locally_deleted noteId
+    suspend fun deleteLocallyDeletedNoteIdDb(locallyDeleteNoteId: String) =
         notesDao.deleteLocallyDeletedNoteId(locallyDeleteNoteId)
 
-    // Insert a locally deleted noteId
-    suspend fun insertLocallyDeletedNoteId(locallyDeleteNoteId: String) =
+    // Insert a locally_deleted noteId
+    private suspend fun insertLocallyDeletedNoteIdDb(locallyDeleteNoteId: String) =
         notesDao.insertLocallyDeletedNoteId(LocallyDeletedNoteId(locallyDeleteNoteId))
 
 

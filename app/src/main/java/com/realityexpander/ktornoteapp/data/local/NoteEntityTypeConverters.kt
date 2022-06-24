@@ -4,7 +4,7 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class NotesTypeConverters {
+class NoteEntityTypeConverters {
 
     @TypeConverter // tells room to use this method to do conversion from json string
     fun fromList(list: List<String>): String { // converts a kotlin List<String> to a json string

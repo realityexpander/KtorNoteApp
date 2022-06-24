@@ -17,7 +17,7 @@ data class NoteEntity(
     val content: String,
     val date: String,
     val dateMillis: Long = 0,
-    val owners: List<String>,  // must use @TypeConverter to convert the list to a json string
+    val owners: List<String>,  // must use @TypeConverter to convert List<String> to json string
     val color: String,
 
     @Expose( // Ignore for retrofit, don't serialize/deserialize

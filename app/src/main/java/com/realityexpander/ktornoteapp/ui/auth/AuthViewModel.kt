@@ -82,7 +82,7 @@ class AuthViewModel @Inject constructor(
 
     fun getOwnerIdForEmail(authEmail: String?): String? {
         return runBlocking {
-            repository.getOwnerIdForEmail(authEmail)
+            repository.getOwnerIdForEmailApi(authEmail)
         }
     }
 
