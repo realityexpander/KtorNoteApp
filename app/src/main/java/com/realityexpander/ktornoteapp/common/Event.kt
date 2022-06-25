@@ -4,8 +4,9 @@ open class Event<out T>(private val content: T) {
     var hasBeenHandled = false
         private set // Allow external read but not write
 
-    // For error handling, in order to show error only once.
-    fun getContentIfNotHandled(): T? {
+    // For error handling/display, in order to show content only once.
+    // And also prevents processing content after configuration change. (ie: an error message)
+    fun getContentOnlyOnce(): T? {
         return if (hasBeenHandled) {
             null
         } else {

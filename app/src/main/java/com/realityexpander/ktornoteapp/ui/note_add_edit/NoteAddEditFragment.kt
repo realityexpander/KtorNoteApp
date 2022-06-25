@@ -2,9 +2,7 @@ package com.realityexpander.ktornoteapp.ui.note_add_edit
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.*
-import androidx.appcompat.view.menu.MenuBuilder
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -19,7 +17,6 @@ import com.realityexpander.ktornoteapp.ui.BaseFragment
 import com.realityexpander.ktornoteapp.ui.common.setDrawableColorTint
 import com.realityexpander.ktornoteapp.ui.dialogs.ColorPickerDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
-import java.lang.reflect.Method
 import java.util.*
 import javax.inject.Inject
 
@@ -70,31 +67,21 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
 
         // Restore ColorPickerDialogFragment state from config change
         if (savedInstanceState != null) {
-            val colorPickerDialog = parentFragmentManager.findFragmentByTag(FRAGMENT_TAG)
-                as ColorPickerDialogFragment?  // make this cast nullable to avoid crash
-            colorPickerDialog?.setPositiveListener { colorStr ->
-                curNoteColor = colorStr
-                changeViewNoteColor(colorStr)
-            }
+            (parentFragmentManager.findFragmentByTag(FRAGMENT_TAG)
+                as? ColorPickerDialogFragment?)  // make this cast nullable to avoid crash
+                ?.setupListeners()
         }
 
         // Setup ColorPickerDialogFragment
         binding.viewNoteColor.setOnClickListener {
-            ColorPickerDialogFragment().apply {
-                setPositiveListener { colorStr ->
-                    curNoteColor = colorStr
-                    changeViewNoteColor(colorStr)
-                }
-            }.show(parentFragmentManager, FRAGMENT_TAG) // FRAGMENT_TAG is to identify the dialog fragment upon config changes
+            ColorPickerDialogFragment()
+                .setupListeners()
+                .show(parentFragmentManager, FRAGMENT_TAG) // FRAGMENT_TAG is to identify the dialog fragment upon config changes
         }
 
         // If Creating a new Note, setup default color picker
         if (args.noteId.isEmpty()) showColorPickerSwatch()
 
-        // TODO Add save button to toolbar
-//        binding.saveButton.setOnClickListener {
-//            saveNote()
-//        }
     }
 
     private fun changeViewNoteColor(newColorString: String) {
@@ -106,6 +93,15 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
         curNoteColor = newColorString
     }
 
+    private fun ColorPickerDialogFragment.setupListeners(): ColorPickerDialogFragment {
+        setPositiveListener { colorStr ->
+            curNoteColor = colorStr
+            changeViewNoteColor(colorStr)
+        }
+
+        return this
+    }
+
     override fun onPause() {
         super.onPause()
 
@@ -115,7 +111,7 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
     private fun subscribeToObservers() {
         viewModel.note.observe(viewLifecycleOwner) { eventResource ->
             if (!eventResource.hasBeenHandled) {
-                eventResource.getContentIfNotHandled()?.let outer@{ resourceNote ->
+                eventResource.getContentOnlyOnce()?.let outer@{ resourceNote ->
 
                     when (resourceNote.status) {
                         Status.SUCCESS -> {
@@ -152,7 +148,6 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
             resources
         )
     }
-
 
     private fun saveNote(): Boolean {
         val authUserId = sharedPref.getString(
@@ -197,7 +192,6 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
         }
         return super.onOptionsItemSelected(item)
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

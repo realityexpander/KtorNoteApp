@@ -16,6 +16,7 @@
         <entry key="app/src/main/res/layout/item_note.xml" value="0.33" />
         <entry key="app/src/main/res/menu/menu_note_add_edit.xml" value="0.1675925925925926" />
         <entry key="app/src/main/res/menu/menu_notes.xml" value="0.1675925925925926" />
+        <entry key="app/src/main/res/menu/note_detail_menu.xml" value="0.13796296296296295" />
       </map>
     </option>
   </component>

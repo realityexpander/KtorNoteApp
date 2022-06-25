@@ -11,6 +11,7 @@ import com.realityexpander.ktornoteapp.data.local.entities.LocallyDeletedNoteId
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.data.remote.NotesApi
 import com.realityexpander.ktornoteapp.data.remote.requests.AccountRequest
+import com.realityexpander.ktornoteapp.data.remote.requests.AddOwnerIdToNoteIdRequest
 import com.realityexpander.ktornoteapp.data.remote.requests.DeleteNoteIdRequest
 import com.realityexpander.ktornoteapp.data.remote.responses.BaseSimpleResponse
 import com.realityexpander.ktornoteapp.data.remote.responses.SimpleResponse
@@ -204,20 +205,25 @@ class NoteRepository @Inject constructor(
         }
 
     // Gets all notes for the authenticated user, wrapped in a Resource
-    suspend fun getAllNotesResourceApi() =
+    suspend fun getAllNotesResourceApi():
+            Resource<SimpleResponseWithData<List<NoteEntity>>> =
         callApi {
             notesApi.getNotes()
         }
 
     // Gets all notes for the authenticated user
-    suspend fun getAllNotesApi() =
+    suspend fun getAllNotesApi():
+            Response<SimpleResponseWithData<List<NoteEntity>>> =
             notesApi.getNotes()
 
-    suspend fun deleteNoteApi(deleteNoteId: String) =
+    // Delete a noteId on the server
+    suspend fun deleteNoteApi(deleteNoteId: String):
+            Resource<SimpleResponseWithData<NoteEntity>> =
         callApi {
             notesApi.deleteNoteId(DeleteNoteIdRequest(deleteNoteId))
         }
 
+    // Get an ownerId for a given email address
     suspend fun getOwnerIdForEmailApi(email: String?): String? {
         if(email.isNullOrBlank()) return null
 
@@ -229,7 +235,41 @@ class NoteRepository @Inject constructor(
         return response.data?.data
     }
 
-    // Standardized call to the API returns a `Resource.<status>` object, possibly with Data
+    // Get an email address for a given ownerId
+    suspend fun getEmailForOwnerIdApi(ownerId: String?): String? {
+        if(ownerId.isNullOrBlank()) return null
+
+        val response = callApi {
+            notesApi.getEmailForOwnerId(ownerId)
+        }
+        if(response.status != Status.SUCCESS) return null
+
+        return response.data?.data
+    }
+
+    // Add an ownerId to a note using their email address
+    suspend fun addOwnerByEmailToNoteIdApi(email: String, noteId: String):
+            Resource<SimpleResponseWithData<NoteEntity>> {
+
+        if(noteId.isBlank()) {
+            return Resource.error("noteId is blank")
+        }
+
+        if(email.isBlank()) {
+            return Resource.error("Owner Email can't be blank")
+        }
+
+        // Lookup the ownerId for the email on the server
+        val ownerId = getOwnerIdForEmailApi(email)
+            ?: return Resource.error("OwnerId is not found for email: $email")
+
+        return callApi {
+            notesApi.addOwnerIdToNoteId(AddOwnerIdToNoteIdRequest(noteId, ownerId))
+        }
+    }
+
+    // Standardized call to the API returns a Resource wrapped object,
+    // possibly with Data as a subclass of BaseSimpleResponse.
     private suspend fun <T : BaseSimpleResponse> callApi(
         call: suspend () -> Response<out T>
     ): Resource<T> = withContext(Dispatchers.IO) {
@@ -285,7 +325,6 @@ class NoteRepository @Inject constructor(
         }
     }
 
-
     ////////////////////////////////////////////////////
     /// LOCAL DATABASE = to/from local database ONLY
 
@@ -312,7 +351,7 @@ class NoteRepository @Inject constructor(
     fun observeNoteIdDb(noteId: String) = notesDao.observeNoteId(noteId)
 
 
-    /// LOCALLY_DELETED_NOTE_ID = uses local database only ///
+    /// LOCALLY DELETED NOTE IDs = uses local database only ///
 
     // Get all locally_deleted noteIds
     private suspend fun getAllLocallyDeletedNoteIdsDb() =
@@ -333,7 +372,7 @@ class NoteRepository @Inject constructor(
 
 
     ////////////////////////////////////////////////////
-    /// Testing only
+    /// Testing
 
     fun testNetworkBoundResource(): Flow<Resource<Pair<String, String>>> {  // always returns a Flow of Resource of a type
         // <currentValue, previousValue>

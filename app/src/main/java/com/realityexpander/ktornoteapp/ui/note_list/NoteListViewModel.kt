@@ -15,8 +15,9 @@ class NoteListViewModel @Inject constructor(
     private val repository: NoteRepository
 ) : ViewModel() {
 
-    private val _forceUpdate = MutableLiveData<Boolean>(false)
-    
+    // forceUpdate is emitted upon load, then used to force update the list of notes.
+    private val _forceUpdate = MutableLiveData<Unit>(Unit)
+
     private val _allNotes =
         _forceUpdate.switchMap {
             repository.getAllNotesCached()
@@ -31,8 +32,9 @@ class NoteListViewModel @Inject constructor(
         return logoutFromViewModel(isLogoutDestructive, repository)
     }
 
+    // Called from pullToRefresh.
     fun syncAllNotes() =
-        _forceUpdate.postValue(true)
+        _forceUpdate.postValue(Unit)
 
     fun deleteNoteId(noteId: String) =
         viewModelScope.launch {

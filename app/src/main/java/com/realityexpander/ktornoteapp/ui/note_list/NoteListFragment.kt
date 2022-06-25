@@ -151,7 +151,7 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
                     Status.ERROR -> {
                         binding.swipeRefreshLayout.isRefreshing = false
 
-                        event.getContentIfNotHandled()?.let { errorResource ->
+                        event.getContentOnlyOnce()?.let { errorResource ->
                             errorResource.message?.let { message ->
                                 showSnackbar(message)
                             }

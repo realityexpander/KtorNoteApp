@@ -47,4 +47,9 @@ interface NotesApi {
         @Query("email") email: String,  // @Query puts the email in the URL params
     ): Response<SimpleResponseWithData<String>>
 
+    @GET("/getEmailForOwnerId")
+    suspend fun getEmailForOwnerId(
+        @Query("ownerId") email: String,  // @Query puts the ownerId in the URL params
+    ): Response<SimpleResponseWithData<String>>
+
 }
