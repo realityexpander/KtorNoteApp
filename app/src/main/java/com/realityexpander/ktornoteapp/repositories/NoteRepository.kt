@@ -107,10 +107,10 @@ class NoteRepository @Inject constructor(
                 isInternetConnected(context)
             },
             debugNetworkResponseType = { response ->
-                println(response)
+                println("debugNetworkResponseType = $response")
             },
             debugDatabaseResultType = { result ->
-                println(result)
+                println("debugDatabaseResultType = $result")
             }
         )
     }
@@ -308,6 +308,8 @@ class NoteRepository @Inject constructor(
             upsertNoteDb(note)
         }
     }
+
+    fun observeNoteIdDb(noteId: String) = notesDao.observeNoteId(noteId)
 
 
     /// LOCALLY_DELETED_NOTE_ID = uses local database only ///

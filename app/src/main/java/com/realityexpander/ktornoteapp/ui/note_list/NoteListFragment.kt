@@ -205,6 +205,10 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
             val note = noteListAdapter.notes[position]
             viewModel.deleteNoteId(note.id)
 
+            if (direction == ItemTouchHelper.LEFT) println("Swipe direction: LEFT")
+            if (direction == ItemTouchHelper.RIGHT) println("Swipe direction: RIGHT")
+
+
             // Add snackbar to show undo action
             Snackbar.make(
                 binding.root,
@@ -319,7 +323,7 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
         // save canvas state
         c.save()
 
-        // Fill for help indicator background
+        // Fill for "swipe left/right" indicator background
         c.drawRect(
             startX, //viewHolder.itemView.left.toFloat(),
             viewHolder.itemView.top.toFloat(),
@@ -331,10 +335,9 @@ class NoteListFragment: BaseFragment(R.layout.fragment_note_list) {
             }
         )
 
-        // Draw help indicator text
+        // Draw "swipe left/right" indicator text
 
-        // find the vertical center for the text block
-        var y = (
+        var y = ( // find the vertical center for the text block
                 (viewHolder.itemView.bottom.toFloat() - viewHolder.itemView.top.toFloat()) / 2f
                 ) - lineSpacing + (textFontSize / (numTextLines + 1))
         drawTextLine(
