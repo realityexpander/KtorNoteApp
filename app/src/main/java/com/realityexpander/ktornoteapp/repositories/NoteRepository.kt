@@ -1,6 +1,7 @@
 package com.realityexpander.ktornoteapp.repositories
 
 import android.app.Application
+import androidx.lifecycle.LiveData
 import com.google.gson.Gson
 import com.realityexpander.ktornoteapp.common.Resource
 import com.realityexpander.ktornoteapp.common.Status
@@ -38,8 +39,9 @@ class NoteRepository @Inject constructor(
 
     ////////////////////////////////////////////////////
     /// CACHED = uses Api and local database
+    ///  * UI is updated via LiveData or Flow subscriptions to database changes.
     ///  ≈ Api -> Database --> UI
-    ///  ≈ Database -> Api -> Database --> UI (as Flow of Resource)
+    ///  ≈ Database -> Api -> Database --> UI
 
     // Update or insert a note
     // Api -> Database --> UI
@@ -80,7 +82,8 @@ class NoteRepository @Inject constructor(
 
     // Get all notes for the authenticated user
     // Database -> Api -> Database --> UI (as Flow of Resource)
-    fun getAllNotesCached(): Flow<Resource<List<NoteEntity>>> {
+    fun getAllNotesCached():
+            Flow<Resource<List<NoteEntity>>> {
         return networkBoundResource(
             queryDb = {
                 getAllNotesDb()
@@ -192,14 +195,16 @@ class NoteRepository @Inject constructor(
 
 
     ////////////////////////////////////////////////////
-    /// REMOTE = to/from Api Only
+    /// REMOTE = to/from Api ONLY
 
-    suspend fun registerApi(email: String, password: String): Resource<SimpleResponse> =
+    suspend fun registerApi(email: String, password: String):
+            Resource<SimpleResponse> =
         callApi {
             notesApi.register(AccountRequest(email, password))
         }
 
-    suspend fun loginApi(email: String, password: String): Resource<SimpleResponse> =
+    suspend fun loginApi(email: String, password: String):
+            Resource<SimpleResponse> =
         callApi {
             notesApi.login(AccountRequest(email, password))
         }
@@ -216,7 +221,7 @@ class NoteRepository @Inject constructor(
             Response<SimpleResponseWithData<List<NoteEntity>>> =
             notesApi.getNotes()
 
-    // Delete a noteId on the server
+    // Delete a noteId
     suspend fun deleteNoteApi(deleteNoteId: String):
             Resource<SimpleResponseWithData<NoteEntity>> =
         callApi {
@@ -224,7 +229,8 @@ class NoteRepository @Inject constructor(
         }
 
     // Get an ownerId for a given email address
-    suspend fun getOwnerIdForEmailApi(email: String?): String? {
+    suspend fun getOwnerIdForEmailApi(email: String?):
+            String? {
         if(email.isNullOrBlank()) return null
 
         val response = callApi {
@@ -236,7 +242,8 @@ class NoteRepository @Inject constructor(
     }
 
     // Get an email address for a given ownerId
-    suspend fun getEmailForOwnerIdApi(ownerId: String?): String? {
+    suspend fun getEmailForOwnerIdApi(ownerId: String?):
+            String? {
         if(ownerId.isNullOrBlank()) return null
 
         val response = callApi {
@@ -270,7 +277,7 @@ class NoteRepository @Inject constructor(
 
     // Standardized call to the API returns a Resource wrapped object,
     // possibly with Data as a subclass of BaseSimpleResponse.
-    private suspend fun <T : BaseSimpleResponse> callApi(
+    private suspend fun <T : BaseSimpleResponse> callApi (
         call: suspend () -> Response<out T>
     ): Resource<T> = withContext(Dispatchers.IO) {
         try {
@@ -325,22 +332,29 @@ class NoteRepository @Inject constructor(
         }
     }
 
+
+
     ////////////////////////////////////////////////////
     /// LOCAL DATABASE = to/from local database ONLY
 
     //suspend fun getNotes() = notesDao.getAllNotes()
-    suspend fun getNoteIdDb(noteId: String) = notesDao.getNoteId(noteId)
+    suspend fun getNoteIdDb(noteId: String): NoteEntity? =
+        notesDao.getNoteId(noteId)
 
     // Delete all notes
-    suspend fun deleteAllNotesDb() = notesDao.deleteAllNotes()
+    suspend fun deleteAllNotesDb() =
+        notesDao.deleteAllNotes()
 
     // Get all notes
-    fun getAllNotesDb() = notesDao.getAllNotes()
+    fun getAllNotesDb(): Flow<List<NoteEntity>> =
+        notesDao.getAllNotes()
 
     // Get all unsynced notes
-    suspend fun getAllUnsyncedNotesDb() = notesDao.getAllUnsyncedNotes()
+    suspend fun getAllUnsyncedNotesDb(): List<NoteEntity> =
+        notesDao.getAllUnsyncedNotes()
 
-    suspend fun upsertNoteDb(note: NoteEntity) = notesDao.upsertNote(note)
+    suspend fun upsertNoteDb(note: NoteEntity) =
+        notesDao.upsertNote(note)
 
     suspend fun upsertNotesDb(notes: List<NoteEntity>) {
         notes.forEach { note ->
@@ -348,13 +362,14 @@ class NoteRepository @Inject constructor(
         }
     }
 
-    fun observeNoteIdDb(noteId: String) = notesDao.observeNoteId(noteId)
+    fun observeNoteIdDb(noteId: String): LiveData<NoteEntity> =
+        notesDao.observeNoteId(noteId)
 
 
     /// LOCALLY DELETED NOTE IDs = uses local database only ///
 
     // Get all locally_deleted noteIds
-    private suspend fun getAllLocallyDeletedNoteIdsDb() =
+    private suspend fun getAllLocallyDeletedNoteIdsDb(): List<String> =
         notesDao.getAllLocallyDeletedNoteIds()
 
     // Delete a locally_deleted noteId
