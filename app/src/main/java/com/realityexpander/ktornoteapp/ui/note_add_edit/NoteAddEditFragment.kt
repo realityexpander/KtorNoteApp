@@ -161,9 +161,10 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
             return false
         }
 
-        // Update the date to the current time
+        // Save the current date/time
         val dateMillis = System.currentTimeMillis()
 
+        // Recreate note with a new note using most of the values as the old note
         val note = NoteEntity(
             id = curNote?.id ?: UUID.randomUUID().toString(),
             title = title,
@@ -172,7 +173,10 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
             owners = if(curNote?.owners.isNullOrEmpty()) listOf(authUserId)
                 else curNote?.owners ?: listOf(authUserId),
             date = millisToDateString(dateMillis),
-            dateMillis = dateMillis
+            dateMillis = dateMillis,
+            createdAt = if(curNote?.createdAt == 0L) dateMillis
+                else curNote?.createdAt ?: dateMillis,
+            updatedAt = if (curNote?.createdAt != 0L) dateMillis else 0L,
         )
 
         viewModel.upsertNote(note)

@@ -8,7 +8,7 @@ import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 
 @Database(
     entities = [NoteEntity::class, LocallyDeletedNoteId::class],
-    version = 2
+    version = 3
 )
 @TypeConverters(NoteEntityTypeConverters::class)  // for converting List<String> for owners
 abstract class NotesDatabase: RoomDatabase() {

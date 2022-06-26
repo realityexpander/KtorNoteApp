@@ -19,6 +19,8 @@ data class NoteEntity(
     val dateMillis: Long = 0,
     val owners: List<String>,  // must use @TypeConverter to convert List<String> to json string
     val color: String,
+    val createdAt: Long = 0,  // milliseconds since epoch
+    val updatedAt: Long = 0,  // milliseconds since epoch
 
     @Expose( // Ignore for retrofit, don't serialize/deserialize
         deserialize = false,

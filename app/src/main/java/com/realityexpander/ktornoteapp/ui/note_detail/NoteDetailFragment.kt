@@ -9,6 +9,7 @@ import com.realityexpander.ktornoteapp.R
 import com.realityexpander.ktornoteapp.common.Status
 import com.realityexpander.ktornoteapp.common.isInternetConnected
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
+import com.realityexpander.ktornoteapp.data.local.entities.millisToDateString
 import com.realityexpander.ktornoteapp.databinding.FragmentNoteDetailBinding
 import com.realityexpander.ktornoteapp.ui.BaseFragment
 import com.realityexpander.ktornoteapp.ui.dialogs.AddOwnerEmailDialog
@@ -103,18 +104,28 @@ class NoteDetailFragment : BaseFragment(R.layout.fragment_note_detail) {
         viewModel.observeNoteId(noteId).observe(viewLifecycleOwner) { note ->
             note?.let {
                 curNote = note
+                println(curNote)
 
                 binding.tvNoteTitle.text = curNote!!.title
                 setMarkdownText(curNote!!.content + "\n\n" +
                         // Get the owner emails for this note if the internet is connected
                         if (isInternetConnected(requireContext())) {
-                            "---\n### owners: _" +
+                            "---\n" +
+                            "### owners: _" +
                             curNote!!.owners.joinToString(separator = ", ") { ownerId ->
                                 viewModel.getEmailForOwnerId(ownerId)
                             } + "_"
                         } else {
                             "No internet connection - can't get owner emails, try again later"
                         }
+                        + "\n" +
+                        (if (curNote!!.createdAt != 0L) {
+                            "#### Created at: " + millisToDateString(curNote!!.createdAt) + "\n"
+                        } else "")
+                        +
+                        (if (curNote!!.updatedAt != curNote!!.createdAt) {
+                            "#### Updated at: " + millisToDateString(curNote!!.updatedAt) + "\n"
+                        } else "")
                 )
             } ?: run {
                 showSnackbar("Error: Note not found")
@@ -129,11 +140,13 @@ class NoteDetailFragment : BaseFragment(R.layout.fragment_note_detail) {
                     if (EventResource.peekContent().data != null) {
                         if (EventResource.peekContent().data!!.isSuccessful) {
                             showSnackbar(
-                                EventResource.getContentOnlyOnce()?.data?.message ?: "An unknown error occurred"
+                                EventResource.getContentOnlyOnce()?.data?.message
+                                    ?: "An unknown error occurred"
                             )
                         } else {
                             showSnackbar(
-                                EventResource.getContentOnlyOnce()?.data?.message ?: "An unknown error occurred"
+                                EventResource.getContentOnlyOnce()?.data?.message
+                                    ?: "An unknown error occurred"
                             )
                         }
                     } else {
