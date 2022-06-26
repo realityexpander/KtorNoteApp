@@ -27,7 +27,7 @@ fun setDrawableColorTint(
     resources: Resources
 ) {
     // Make sure its in hex format
-    val tintColorStrHexFormat =
+    val tintColorConformed =
         if(!tintColorStr.startsWith("#")) {
             "#$tintColorStr"
         } else
@@ -37,7 +37,7 @@ fun setDrawableColorTint(
     drawable?.let {
         try {
             val wrappedDrawable = DrawableCompat.wrap(it)
-            val color = Color.parseColor(tintColorStrHexFormat)
+            val color = Color.parseColor(tintColorConformed)
             DrawableCompat.setTint(wrappedDrawable, color)
             view.background = wrappedDrawable
         } catch (e: Exception) {

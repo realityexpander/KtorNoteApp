@@ -14,6 +14,7 @@ import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.data.local.entities.millisToDateString
 import com.realityexpander.ktornoteapp.databinding.FragmentNoteAddEditBinding
 import com.realityexpander.ktornoteapp.ui.BaseFragment
+import com.realityexpander.ktornoteapp.ui.common.NOTE_SHAPE_RESOURCE_ID
 import com.realityexpander.ktornoteapp.ui.common.setDrawableColorTint
 import com.realityexpander.ktornoteapp.ui.dialogs.ColorPickerDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -85,8 +86,9 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
     }
 
     private fun changeViewNoteColor(newColorString: String) {
-        setDrawableColorTint(binding.viewNoteColor,
-            R.drawable.hexagon_shape,
+        setDrawableColorTint(
+            binding.viewNoteColor,
+            NOTE_SHAPE_RESOURCE_ID,
             newColorString,
             resources
         )
@@ -143,7 +145,7 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
         binding.viewNoteColor.visibility = View.VISIBLE
         setDrawableColorTint(
             binding.viewNoteColor,
-            R.drawable.hexagon_shape,
+            NOTE_SHAPE_RESOURCE_ID,
             curNoteColor,
             resources
         )

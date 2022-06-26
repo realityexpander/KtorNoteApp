@@ -1,21 +1,15 @@
 package com.realityexpander.ktornoteapp.ui.adapters
 
-import android.content.res.Resources
-import android.graphics.Color
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.realityexpander.ktornoteapp.R
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.databinding.ItemNoteBinding
+import com.realityexpander.ktornoteapp.ui.common.NOTE_SHAPE_RESOURCE_ID
 import com.realityexpander.ktornoteapp.ui.common.setDrawableColorTint
-import java.text.SimpleDateFormat
-import java.util.*
 
 class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
 
@@ -72,7 +66,7 @@ class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
             bind.tvDate.text = note.date
 
             setDrawableColorTint(bind.viewNoteColor,
-                R.drawable.hexagon_shape,
+                NOTE_SHAPE_RESOURCE_ID,
                 note.color,
                 resources
             )
