@@ -8,7 +8,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.material.textfield.TextInputEditText
 
-// When Done button on soft keyboard is pressed, run the given action
+// When "Done" button on soft keyboard is pressed, run the given action
 fun TextInputEditText.onImeDone(callback: () -> Unit) {
     setOnEditorActionListener { _, actionId, _ ->
         if (actionId == EditorInfo.IME_ACTION_DONE) {
