@@ -26,12 +26,13 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import javax.inject.Inject
+import javax.inject.Named
 
 // All functions for local database and remote API
 class NoteRepository @Inject constructor(
     private val notesDao: NotesDao,
     private val context: Application,  // for connectivity check
-    private val notesApi: NotesApi,
+    @Named("NotesApi_accept_all_certs_for_development") private val notesApi: NotesApi,
     private val gson: Gson
 ) {
 
