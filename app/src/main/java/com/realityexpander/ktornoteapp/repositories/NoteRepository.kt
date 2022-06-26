@@ -277,14 +277,14 @@ class NoteRepository @Inject constructor(
 
     // Standardized call to the API returns a Resource wrapped object,
     // possibly with Data as a subclass of BaseSimpleResponse.
-    private suspend fun <T : BaseSimpleResponse> callApi (
+    private suspend fun <T: BaseSimpleResponse> callApi (
         call: suspend () -> Response<out T>
     ): Resource<T> = withContext(Dispatchers.IO) {
         try {
             val retrofitResponse = call()
 
             if (retrofitResponse.isSuccessful) {
-                return@withContext retrofitResponse.body()?.let { apiResponse ->
+                return@withContext retrofitResponse.body()?.let { apiResponse: T ->
                     if (apiResponse.isSuccessful) {
                         Resource.success(apiResponse.message, apiResponse, apiResponse.statusCode)
                     } else {
