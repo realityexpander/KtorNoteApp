@@ -72,7 +72,7 @@ class NoteListAdapter: RecyclerView.Adapter<NoteListAdapter.NoteViewHolder>() {
             bind.tvDate.text = note.date
 
             setDrawableColorTint(bind.viewNoteColor,
-                R.drawable.circle_shape,
+                R.drawable.hexagon_shape,
                 note.color,
                 resources
             )

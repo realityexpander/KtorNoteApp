@@ -104,7 +104,6 @@ class NoteDetailFragment : BaseFragment(R.layout.fragment_note_detail) {
         viewModel.observeNoteId(noteId).observe(viewLifecycleOwner) { note ->
             note?.let {
                 curNote = note
-                println(curNote)
 
                 binding.tvNoteTitle.text = curNote!!.title
                 setMarkdownText(curNote!!.content + "\n\n" +

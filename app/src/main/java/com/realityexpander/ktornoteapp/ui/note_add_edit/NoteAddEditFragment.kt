@@ -86,7 +86,7 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
 
     private fun changeViewNoteColor(newColorString: String) {
         setDrawableColorTint(binding.viewNoteColor,
-            R.drawable.circle_shape,
+            R.drawable.hexagon_shape,
             newColorString,
             resources
         )
@@ -143,7 +143,7 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
         binding.viewNoteColor.visibility = View.VISIBLE
         setDrawableColorTint(
             binding.viewNoteColor,
-            R.drawable.circle_shape,
+            R.drawable.hexagon_shape,
             curNoteColor,
             resources
         )
