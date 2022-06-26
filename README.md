@@ -1,7 +1,8 @@
 # KtorNoteApp
 Android Notes app that uses Ktor back end server
 
-# Technologies used
+# Technologies employed:
+
 * Kotlin 
 * MVVM
 * Coroutines
