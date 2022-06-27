@@ -1,0 +1,26 @@
+# These values are generated and found in BuildConfig.java
+
+IS_CLEARTEXT_HTTP_ALLOWED=false
+
+# Remote server address
+SERVER_URL="https://<**INSERT_SERVER_IP_HERE**>:8002"
+
+
+
+#######################################
+#### FOR REFERENCE AND CONVENIENCE ####
+
+# :8001 is the unencrypted port for the server
+# :8002 is the encrypted port for the server
+
+# for emulator running on local machine
+#SERVER_URL="http://10.0.2.2:8001"
+
+# for real device running on WIFI network
+#SERVER_URL="http://<**INSERT_LOCAL_DEV_MACHINE_IP_ADDRESS_HERE**>:8001"
+
+# for real device running on WIFI network using Https
+#SERVER_URL="https://<**INSERT_LOCAL_DEV_MACHINE_IP_ADDRESS_HERE**>:8002"
+
+# Remote server address
+#SERVER_URL="https://<**INSERT_SERVER_IP_HERE**>:8002"

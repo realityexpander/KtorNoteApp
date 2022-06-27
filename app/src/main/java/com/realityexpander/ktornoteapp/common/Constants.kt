@@ -1,10 +1,10 @@
 package com.realityexpander.ktornoteapp.common
 
+import com.realityexpander.ktornoteapp.BuildConfig
+
 object Constants {
 
-    // const val BASE_URL = "http://10.0.2.2:8001" // for emulator running on local machine
-    // const val BASE_URL = "http://192.168.0.186:8001" // for real device running on WIFI network
-    const val BASE_URL = "https://192.168.0.186:8002" // for real device running on WIFI network using Https
+    const val SERVER_URL = BuildConfig.SERVER_URL
 
     // These endpoints will be accessed without authentication headers
     val PUBLIC_ENDPOINTS = listOf(

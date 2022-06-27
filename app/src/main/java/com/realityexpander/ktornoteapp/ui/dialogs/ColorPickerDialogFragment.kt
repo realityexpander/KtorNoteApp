@@ -63,7 +63,7 @@ class ColorPickerDialogFragment(val colorStr: String) : DialogFragment() { // Di
 
     fun setColor(colorStr: String) {
         val colorInt = Color.parseColor(prependHashIfNotPresent(colorStr))
-        colorPickerView?.selectByHsvColor(colorInt) //setInitialColor(colorInt)
+        colorPickerView.selectByHsvColor(colorInt) //setInitialColor(colorInt)
     }
 
 }

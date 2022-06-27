@@ -7,7 +7,7 @@ import androidx.room.Room
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
-import com.realityexpander.ktornoteapp.common.Constants.BASE_URL
+import com.realityexpander.ktornoteapp.common.Constants.SERVER_URL
 import com.realityexpander.ktornoteapp.common.Constants.DATABASE_NAME
 import com.realityexpander.ktornoteapp.common.Constants.ENCRYPTED_SHARED_PREF_NAME
 import com.realityexpander.ktornoteapp.data.local.NotesDao
@@ -116,7 +116,7 @@ object AppModule {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(SERVER_URL)
             .addConverterFactory(GsonConverterFactory.create()) // Convert the JSON response to a POJO
             .client(okHttpClient) // Add the client with our Basic Authentication interceptor
             .build()
@@ -134,7 +134,7 @@ object AppModule {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(SERVER_URL)
             .addConverterFactory(GsonConverterFactory.create()) // Convert the JSON response to a POJO
             .client(okHttpClient) // Add the client with our Basic Authentication interceptor
             .build()

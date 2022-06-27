@@ -17,7 +17,20 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        manifestPlaceholders = [ IS_CLEARTEXT_HTTP_ALLOWED: "false" ]  // for https
+
+        // App configuration from the `app.properties` file in the root of the project.
+        Properties properties = new Properties()
+        if(project.rootProject.file("app.properties") != null) {
+            properties.load(project.rootProject.file("app.properties").newDataInputStream())
+        } else {
+            println("ERROR - No 'app.properties' file found in root of project")
+        }
+
+        // Sets properties in the BuildConfig class.
+        buildConfigField "String", "SERVER_URL", "${properties.getProperty("SERVER_URL")}"
+
+        // Sets properties in the manifest.
+        manifestPlaceholders = [ IS_CLEARTEXT_HTTP_ALLOWED: "${properties.getProperty("IS_CLEARTEXT_HTTP_ALLOWED")}" ]  // for https
         // manifestPlaceholders = [ IS_CLEARTEXT_HTTP_ALLOWED: "true" ] // for http
     }
 
