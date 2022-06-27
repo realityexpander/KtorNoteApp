@@ -73,14 +73,14 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
                 ?.setupListeners()
         }
 
-        // Setup ColorPickerDialogFragment
+        // Setup click listener for swatch to open ColorPickerDialogFragment
         binding.viewNoteColor.setOnClickListener {
-            ColorPickerDialogFragment()
+            ColorPickerDialogFragment(curNoteColor)
                 .setupListeners()
                 .show(parentFragmentManager, FRAGMENT_TAG) // FRAGMENT_TAG is to identify the dialog fragment upon config changes
         }
 
-        // If Creating a new Note, setup default color picker
+        // If creating a new Note, show default color in the swatch
         if (args.noteId.isEmpty()) showColorPickerSwatch()
 
     }

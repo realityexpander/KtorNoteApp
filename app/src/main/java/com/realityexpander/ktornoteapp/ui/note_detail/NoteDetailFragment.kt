@@ -1,5 +1,7 @@
 package com.realityexpander.ktornoteapp.ui.note_detail
 
+import android.content.pm.PackageManager
+import android.content.pm.Signature
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.viewModels
@@ -15,6 +17,12 @@ import com.realityexpander.ktornoteapp.ui.BaseFragment
 import com.realityexpander.ktornoteapp.ui.dialogs.AddOwnerEmailDialog
 import dagger.hilt.android.AndroidEntryPoint
 import io.noties.markwon.Markwon
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+import java.security.cert.CertificateException
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
+
 
 const val ADD_OWNER_DIALOG_TAG = "AddOwnerEmailDialog"
 
@@ -115,7 +123,7 @@ class NoteDetailFragment : BaseFragment(R.layout.fragment_note_detail) {
                                 viewModel.getEmailForOwnerId(ownerId)
                             } + "_"
                         } else {
-                            "No internet connection - can't get owner emails, try again later"
+                            "No internet connection - can't get owner's email, try again later"
                         }
                         + "\n" +
                         (if (curNote!!.createdAt != 0L) {

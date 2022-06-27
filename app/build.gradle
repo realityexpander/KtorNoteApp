@@ -117,7 +117,7 @@ dependencies {
     implementation "io.noties.markwon:core:4.4.0"
 
     // Color Picker Dialog
-    implementation "com.github.skydoves:colorpickerview:2.1.7"
+    implementation "com.github.skydoves:colorpickerview:2.2.4"
 
     // For Ktor HTTP Response Codes
     implementation "io.ktor:ktor-server-core:$ktor_version"
