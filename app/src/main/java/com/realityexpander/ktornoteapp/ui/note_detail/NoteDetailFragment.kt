@@ -114,26 +114,7 @@ class NoteDetailFragment : BaseFragment(R.layout.fragment_note_detail) {
                 curNote = note
 
                 binding.tvNoteTitle.text = curNote!!.title
-                setMarkdownText(curNote!!.content + "\n\n" +
-                        // Get the owner emails for this note if the internet is connected
-                        if (isInternetConnected(requireContext())) {
-                            "---\n" +
-                            "### owners: _" +
-                            curNote!!.owners.joinToString(separator = ", ") { ownerId ->
-                                viewModel.getEmailForOwnerId(ownerId)
-                            } + "_"
-                        } else {
-                            "No internet connection - can't get owner's email, try again later"
-                        }
-                        + "\n" +
-                        (if (curNote!!.createdAt != 0L) {
-                            "#### Created at: " + millisToDateString(curNote!!.createdAt) + "\n"
-                        } else "")
-                        +
-                        (if (curNote!!.updatedAt != curNote!!.createdAt) {
-                            "#### Updated at: " + millisToDateString(curNote!!.updatedAt) + "\n"
-                        } else "")
-                )
+                setMarkdownText(curNote!!.content + "\n\n" + getOwnerEmails())
             } ?: run {
                 showSnackbar("Error: Note not found")
             }
@@ -174,6 +155,29 @@ class NoteDetailFragment : BaseFragment(R.layout.fragment_note_detail) {
 
         }
 
+    }
+
+    private fun getOwnerEmails(): String {
+        // Get the owner emails for this note if the internet is connected
+        return (
+            "---\n" +
+                if (isInternetConnected(requireContext())) {
+                    "### owners: _" +
+                    curNote!!.owners.joinToString(separator = ", ") { ownerId ->
+                        viewModel.getEmailForOwnerId(ownerId)
+                    } + "_"
+                } else {
+                    "No internet connection - can't get owner's email, try again later"
+                }
+            + "\n" +
+                (if (curNote!!.createdAt != 0L) {
+                    "#### Created at: " + millisToDateString(curNote!!.createdAt) + "\n"
+                } else "")
+            +
+                (if (curNote!!.updatedAt != curNote!!.createdAt) {
+                    "#### Updated at: " + millisToDateString(curNote!!.updatedAt) + "\n"
+                } else "")
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

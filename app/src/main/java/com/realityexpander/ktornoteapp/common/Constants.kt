@@ -23,6 +23,4 @@ object Constants {
     const val ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_USER_ID =
         "encrypted_shared_pref_key_logged_in_user_id"
 
-    const val DEFAULT_NOTE_COLOR = "#CCFFCC"
-
 }

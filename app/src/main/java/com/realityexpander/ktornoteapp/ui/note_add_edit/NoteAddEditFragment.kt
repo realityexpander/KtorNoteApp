@@ -7,13 +7,13 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.realityexpander.ktornoteapp.R
-import com.realityexpander.ktornoteapp.common.Constants.DEFAULT_NOTE_COLOR
 import com.realityexpander.ktornoteapp.common.Constants.ENCRYPTED_SHARED_PREF_KEY_LOGGED_IN_USER_ID
 import com.realityexpander.ktornoteapp.common.Status
 import com.realityexpander.ktornoteapp.data.local.entities.NoteEntity
 import com.realityexpander.ktornoteapp.data.local.entities.millisToDateString
 import com.realityexpander.ktornoteapp.databinding.FragmentNoteAddEditBinding
 import com.realityexpander.ktornoteapp.ui.BaseFragment
+import com.realityexpander.ktornoteapp.ui.common.DEFAULT_NOTE_COLOR
 import com.realityexpander.ktornoteapp.ui.common.NOTE_SHAPE_RESOURCE_ID
 import com.realityexpander.ktornoteapp.ui.common.setDrawableColorTint
 import com.realityexpander.ktornoteapp.ui.dialogs.ColorPickerDialogFragment
@@ -28,7 +28,6 @@ const val FRAGMENT_TAG = "NoteAddEditFragment"
 class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
 
     private val viewModel: NoteAddEditViewModel by viewModels()
-
     private val args: NoteAddEditFragmentArgs by navArgs()
 
     // Values for the Note we are currently editing
@@ -39,7 +38,6 @@ class NoteAddEditFragment : BaseFragment(R.layout.fragment_note_add_edit) {
     lateinit var sharedPref: SharedPreferences
 
     private var _binding: FragmentNoteAddEditBinding? = null
-
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
