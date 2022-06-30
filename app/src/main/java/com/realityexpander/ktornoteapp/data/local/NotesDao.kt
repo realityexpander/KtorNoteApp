@@ -18,10 +18,10 @@ interface NotesDao {
     suspend fun upsertNote(note: NoteEntity)
 
     @Query("DELETE FROM notes WHERE id = :noteId")
-    suspend fun deleteNoteId(noteId: String)
+    suspend fun deleteNoteId(noteId: String): Unit
 
     @Query("DELETE FROM notes WHERE isSynced = 1") // Delete all synced notes
-    suspend fun deleteAllSyncedNotes()
+    suspend fun deleteAllSyncedNotes(): Unit
 
     // returning LiveData excludes the need to declare this a suspend func
     @Query("SELECT * FROM notes WHERE id = :noteId")
@@ -38,7 +38,7 @@ interface NotesDao {
     suspend fun getAllUnsyncedNotes(): List<NoteEntity>
 
     @Query("DELETE FROM notes")
-    suspend fun deleteAllNotes()
+    suspend fun deleteAllNotes(): Unit
 
 
     //// LOCALLY DELETED NOTE IDs ////

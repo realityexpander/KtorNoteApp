@@ -284,6 +284,9 @@ class NoteRepository @Inject constructor(
         try {
             val retrofitResponse = call()
 
+            // Get response headers
+            // retrofitResponse.headers().forEach { println("Headers: $it") }
+
             if (retrofitResponse.isSuccessful) {
                 return@withContext retrofitResponse.body()?.let { apiResponse: T ->
                     if (apiResponse.isSuccessful) {
