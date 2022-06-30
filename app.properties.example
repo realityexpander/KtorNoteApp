@@ -1,4 +1,5 @@
 # These values are generated and found in BuildConfig.java
+# Look for the actual params in LastPass
 
 IS_CLEARTEXT_HTTP_ALLOWED=false
 
