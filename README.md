@@ -1,6 +1,8 @@
 # KtorNoteApp
 Android Notes app that uses Ktor back end server
 
+Back End server: https://github.com/realityexpander/ktor-note-app
+
 # Technologies employed:
 
 * Kotlin 
