@@ -41,6 +41,7 @@ Allows users to:
 * Securely saves passwords using modern encryption standards
 * Encrypted HTTPS traffic
 * Deployable Ktor server accessable from anywhere
+* Animated Motion Views
 
 Note : this repository only contains the android app part, Ktor API is in this repo: https://github.com/realityexpander/ktor-note-app
 
