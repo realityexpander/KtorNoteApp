@@ -47,7 +47,7 @@ Note : this repository only contains the android app part, Ktor API is in this r
 To install the Apk:
 
 1. Open this link on your Android device:
-   https://github.com/realityexpander/KtorNoteApp/blob/master/KtorNoteApp_1.0.apk
+   https://github.com/realityexpander/KtorNoteApp/blob/master/ktor-note-app_1.0.apk
 2. Tap the "skewer" menu and tap the "download"
 
    [![](https://user-images.githubusercontent.com/5157474/147434050-57102a30-af32-46ed-a90b-d94e0c4a4f35.jpg)]()
