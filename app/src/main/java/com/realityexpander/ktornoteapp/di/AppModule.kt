@@ -126,7 +126,7 @@ object AppModule {
     @Singleton
     @Provides
     @Named("NotesApi_production")
-    // This NotesApi is for production. (for production only)
+    // This NotesApi is for production. (for production only, requires real certified SSL certificate)
     fun provideNotesApiProd(basicAuthInterceptor: BasicAuthInterceptor): NotesApi {
 
         val okHttpClient = OkHttpClient.Builder()

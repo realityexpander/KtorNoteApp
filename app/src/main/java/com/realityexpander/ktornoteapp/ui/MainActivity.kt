@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
     private val VALID = 0
     private val INVALID = 1
 
+    // Helper to validate the application is signed with correct certificate.
     fun printAppSignature(context: Context): Int {
         try {
             val packageInfo: PackageInfo = context.getPackageManager()
